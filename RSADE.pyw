@@ -1,14 +1,34 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter.filedialog import askopenfilename
 
-##funcion para obtener el elemento seleccionado de la lista de opciones
-def obtener_info():
-    miAlgoritmo=lista_desplegable.get()
-    print(miAlgoritmo)
+#--------------------------Funciones--------------------------------------------
 
+#Funcion de graficar eventos
+def graficarEvento():
+    #variable del algoritmo seleccionado
+    miAlgoritmo =lista_desplegable.get()
 
-#variable del algoritmo seleccionado
-#miAlgoritmo=StringVar()
+    #se obtienen los parametros ingresadors por el usuario
+    nsta        = nstaText.get()
+    nlta        = nltaText.get()
+    triggerOn   = triggerOnText.get()
+    triggerOff  = triggerOffText.get()
+    print(nlta)
+
+    if miAlgoritmo == "Classic STA/LTA":
+        print(miAlgoritmo)
+    elif miAlgoritmo == "Recursive STA/LTA":
+        print(miAlgoritmo)
+    else:
+        print('ninguna opcion valida')
+
+def seleccionarArchivo():
+    Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
+    filename = askopenfilename() # show an "Open" dialog box and return the path to the selected file
+    print(filename)
+    miArchivo.set(filename)
+
 
 raiz=Tk()
 
@@ -80,9 +100,18 @@ triggerOnText.grid(row=2, column=7)
 triggerOffText=Entry(miFrame)
 triggerOffText.grid(row=3, column=7)
 
+#variable del nombre del archivo seleccionado
+miArchivo=StringVar()
+
+# Input text
+cuadroNombre=Entry(miFrame, textvariable=miArchivo, width=40)
+cuadroNombre.grid(row=3, column=1, padx=10)
+
 #--------------------Botones----------------
-# Boton Graficar Eventos
-Button(miFrame, text="Graficar Eventos", command=obtener_info).grid(row=4, column=3, padx=50, pady=10)
+# Boton para Seleccionar Archivo
+Button(miFrame, text="Seleccionar Archivo", command=seleccionarArchivo).grid(row=4, column=1, padx=50, pady=10)
+# Boton Graficar Eventos seleccionarArchivo
+Button(miFrame, text="Graficar Eventos", command=graficarEvento).grid(row=4, column=3, padx=50, pady=10)
 # Boton Obtener Eventos
 Button(miFrame, text="Obtener Eventos").grid(row=4, column=4, padx=50, pady=10)
 # Boton para extraer archivo miniSeed

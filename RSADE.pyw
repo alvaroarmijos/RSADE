@@ -44,17 +44,17 @@ lista_desplegable['values']=algoritmos
 
 # ---------------Inputs-----------------------------
 ## Titulo de NSTA
-Label(miFrame, text="NSTA", font=(18)).grid(row=2, column=2, padx=10, pady=10)
+Label(miFrame, text="NSTA:", font=(18)).grid(row=2, column=2, padx=10, pady=10)
 ## Titulo de NLTA
-Label(miFrame, text="NLTA", font=(18)).grid(row=2, column=4, padx=10, pady=10)
+Label(miFrame, text="NLTA:", font=(18)).grid(row=2, column=4, padx=10, pady=10)
 ## Titulo de Triger On
-Label(miFrame, text="TRIGGER_ON", font=(18)).grid(row=3, column=2, padx=10, pady=10)
+Label(miFrame, text="TRIGGER_ON:", font=(18)).grid(row=3, column=2, padx=10, pady=10)
 ## Titulo de Triger Off
-Label(miFrame, text="TRIGGER_OFF", font=(18)).grid(row=3, column=4, padx=10, pady=10)
+Label(miFrame, text="TRIGGER_OFF:", font=(18)).grid(row=3, column=4, padx=10, pady=10)
 ## Titulo de Ingresar hora inicio
-Label(miFrame, text="Hora Inicio", font=(18)).grid(row=2, column=6, padx=10, pady=10)
+Label(miFrame, text="Hora Inicio:", font=(18)).grid(row=2, column=6, padx=10, pady=10)
 ## Titulo de Ingresar hora fin
-Label(miFrame, text="Hora Fin", font=(18)).grid(row=3, column=6, padx=10, pady=10)
+Label(miFrame, text="Hora Fin:", font=(18)).grid(row=3, column=6, padx=10, pady=10)
 
 #NSTA input
 nstaText=Entry(miFrame)
@@ -72,17 +72,27 @@ triggerOnText.grid(row=3, column=3)
 triggerOffText=Entry(miFrame)
 triggerOffText.grid(row=3, column=5)
 
+#Hora Inicio
+triggerOnText=Entry(miFrame)
+triggerOnText.grid(row=2, column=7)
+
+#Hora Fin
+triggerOffText=Entry(miFrame)
+triggerOffText.grid(row=3, column=7)
+
 #--------------------Botones----------------
 # Boton Graficar Eventos
-#Button(miFrame, text="Graficar Eventos", command=obtener_info).grid(row=2, column=6, padx=50, pady=10)
+Button(miFrame, text="Graficar Eventos", command=obtener_info).grid(row=4, column=3, padx=50, pady=10)
 # Boton Obtener Eventos
-#Button(miFrame, text="Obtener Eventos").grid(row=3, column=6, padx=50, pady=10)
+Button(miFrame, text="Obtener Eventos").grid(row=4, column=4, padx=50, pady=10)
+# Boton para extraer archivo miniSeed
+Button(miFrame, text="Obtener miniSeed").grid(row=4, column=5, padx=50, pady=10)
 
 
 #-------------------------Imagenes--------------------------------------------
 # Eventos
 miImagen = PhotoImage(file="p7.png")
-Label(miFrame, image=miImagen).grid(row=5, column=0, columnspan=6)
+Label(miFrame, image=miImagen).grid(row=5, column=0, columnspan=7)
 
 #pantalla completa
 raiz.state('zoomed')

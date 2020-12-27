@@ -5,7 +5,7 @@ from tkinter import filedialog as fd
 from tkinter import messagebox as mb
 import os
 import obspy
-from obspy.signal.trigger import classic_sta_lta, plot_trigger, trigger_onset
+from obspy.signal.trigger import classic_sta_lta, recursive_sta_lta, plot_trigger, trigger_onset
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
@@ -38,11 +38,11 @@ def graficarEvento():
         
 
         if miAlgoritmo == "Classic STA/LTA":
-            graficarClassicSta(nsta, nlta, triggerOn, triggerOff, hInicio, hFin)
+            graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 1)
         elif miAlgoritmo == "Recursive STA/LTA":
-            print(miAlgoritmo)
+            graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 2)
         else:
-            print('ninguna opcion valida')
+            mb.showinfo("Información", "Debe seleccionar un Algoritmo correcto")
         
 def obtenerEvento():
     #variable del algoritmo seleccionado
@@ -64,11 +64,11 @@ def obtenerEvento():
         
 
         if miAlgoritmo == "Classic STA/LTA":
-            eventosClassicSta(nsta, nlta, triggerOn, triggerOff, hInicio, hFin)
+            eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 1)
         elif miAlgoritmo == "Recursive STA/LTA":
-            print(miAlgoritmo)
+            eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 2)
         else:
-            print('ninguna opcion valida')
+            mb.showinfo("Información", "Debe seleccionar un Algoritmo correcto")
         
 def guardarMiniSeed():
     
@@ -99,6 +99,7 @@ def seleccionarArchivo():
     filename = askopenfilename() # show an "Open" dialog box and return the path to the selected file
     print(filename)
     miArchivo.set(filename)
+    archivo.configure(text=filename, font=(12)) 
     
 def comprobar(nsta):
     if nsta == "":
@@ -106,8 +107,7 @@ def comprobar(nsta):
     else:
         print(nsta)
     
-def graficarClassicSta(nsta, nlta, triggerOn, triggerOff, hInicio, hFin):
-    print("Classic STA/LTA")
+def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo):
     
     if nsta=="" or nlta=="" or triggerOn=="" or triggerOff=="":
         mb.showinfo("Información", "Debe ingresar los parámetros necesarios antes de Graficar")
@@ -127,33 +127,58 @@ def graficarClassicSta(nsta, nlta, triggerOn, triggerOff, hInicio, hFin):
         trace.data = trace.data/6553.6
         trace.filter('bandpass', freqmin = 5, freqmax = 20)
         df = trace.stats.sampling_rate
-        cft = classic_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
+        
+        # se define el tipo de algoritmo a usar
+        #1 = "Classic STA/LTA", 2 = "Recursive STA/LTA", 3 = "Delayed STA/LTA", 4 = "Z-detector", 5="Baer- and Kradolfer-picker", 6 = "AR-AIC"
+        if tipoAlgoritmo == 1:
+            cft = classic_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
+        elif tipoAlgoritmo == 2:
+            cft = recursive_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
+        else:
+            mb.showinfo("Información", "Debe seleccionar un Algoritmo correcto")
+        
         #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
         on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
         # Plotting the results
-        ax = plt.subplot(211)
-        plt.plot(trace.data, 'k')
-        ymin, ymax = ax.get_ylim()
-        plt.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
-        plt.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
-        plt.subplot(212, sharex=ax)
-        plt.plot(cft, 'k')
-        plt.hlines([3.5, 0.5], 0, len(cft), color=['r', 'b'], linestyle='--')
-        plt.axis('tight')
+        f = plt.Figure(figsize=(16, 9))
+        a = f.add_subplot(211)
+        #ax = a.subplot(211)
+        a.plot(trace.data, 'k')
+        ymin, ymax = a.get_ylim()
+        a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
+        a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
+        b = f.add_subplot(212)
+        #b.subplot(212, sharex=ax)
+        b.plot(cft, 'k')
+        b.hlines([3.5, 0.5], 0, len(cft), color=['r', 'b'], linestyle='--')
+        b.axis('tight')
         #plt.show()
-        fig = Figure(figsize=(5, 4), dpi=100)
-        fig.add_subplot(111).plot(trace.data, 'k')
-        canvas = FigureCanvasTkAgg(fig, master=raiz)  # CREAR AREA DE DIBUJO DE TKINTER.
+        global canvas
+        
+        #se intenta borrar la grafica en caso de que ya este dibujada en la interfaz
+        try:
+            canvas.get_tk_widget().pack_forget() # use the delete method here
+        except:
+            pass
+        
+        
+        canvas = FigureCanvasTkAgg(f, top_frame)
+        
+        canvas.get_tk_widget().pack(side="left", fill="both")
         canvas.draw()
-        canvas.get_tk_widget().pack(side=nstaText.BOTTOM, fill=tkinter.BOTH, expand=1)
+
+        toolbar = NavigationToolbar2Tk(canvas, bottom_frame)
+        toolbar.update()
+        canvas._tkcanvas.pack(side="left", fill="both")
+        
     
-def eventosClassicSta(nsta, nlta, triggerOn, triggerOff, hInicio, hFin):
+def eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo):
     print("Classic STA/LTA")
     
     if nsta=="" or nlta=="" or triggerOn=="" or triggerOff=="":
         mb.showinfo("Información", "Debe ingresar los parámetros necesarios antes de obtener los eventos")
     else:
-        st = obspy.read("200428000000-CH0.mseed")[0]
+        st = obspy.read(miArchivo.get())[0]
         
         if hInicio == "" and hFin == "" :
             t = st.stats.starttime
@@ -170,21 +195,22 @@ def eventosClassicSta(nsta, nlta, triggerOn, triggerOff, hInicio, hFin):
         trace.filter('bandpass', freqmin = 5, freqmax = 20)
         df = trace.stats.sampling_rate
 
-        #cft = classic_sta_lta(trace.data, int(10 * df), int(70 * df))
-        cft = classic_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
+        # se define el tipo de algoritmo a usar
+        #1 = "Classic STA/LTA", 2 = "Recursive STA/LTA", 3 = "Delayed STA/LTA", 4 = "Z-detector", 5="Baer- and Kradolfer-picker", 6 = "AR-AIC"
+        if tipoAlgoritmo == 1:
+            cft = classic_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
+        elif tipoAlgoritmo == 2:
+            cft = recursive_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
+        else:
+            mb.showinfo("Información", "Debe seleccionar un Algoritmo correcto")
+            
         on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
-        #print(trace.stats)
-        #print(trace.data)
-        #print(on_of)
-        #np.savetxt("Classic-STA/LTA-"+hInicio+"-"+hFin+".txt", on_of)
-        #plot_trigger(trace, cft, 1.15, 0.5)
-        #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
         nombrearch=fd.asksaveasfilename(initialdir = "/",title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
         if nombrearch!='':
             archi1=open(nombrearch, "w", encoding="utf-8")
             archi1.write(str(on_of))
             archi1.close()
-            mb.showinfo("Información", "Los datos fueron guardados en el archivo.")
+            mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
 
 #---------------------#Interfaz------------------------------------------------
 raiz=Tk()
@@ -199,6 +225,12 @@ miFrame=Frame()
 
 #se empaueta el frame y este se acomoda al tamano de la ventana
 miFrame.pack(fill="both", expand="True")
+
+top_frame = Frame(raiz)
+top_frame.pack(side="top", fill="both", expand=True)
+bottom_frame = Frame(raiz)
+bottom_frame.pack(side="top", fill="both", expand=True)
+
 
 #tamano del frame
 #miFrame.config(width="800", height="800")
@@ -220,6 +252,10 @@ algoritmos = ["Classic STA/LTA", "Recursive STA/LTA", "Delayed STA/LTA", "Z-dete
 lista_desplegable['values']=algoritmos
 
 # ---------------Inputs-----------------------------
+## Nombre del archivo seleccionado
+archivo=Label(miFrame, text="", font=(12))
+archivo.grid(row=3, column=1, padx=10)
+
 ## Titulo de NSTA
 Label(miFrame, text="NSTA:", font=(18)).grid(row=2, column=2, padx=10, pady=10)
 ## Titulo de NLTA
@@ -261,8 +297,8 @@ horaFin.grid(row=3, column=7)
 miArchivo=StringVar()
 
 # Input text
-cuadroNombre=Entry(miFrame, textvariable=miArchivo, width=40)
-cuadroNombre.grid(row=3, column=1, padx=10)
+#cuadroNombre=Entry(miFrame, textvariable=miArchivo, width=40)
+#cuadroNombre.grid(row=3, column=1, padx=10)
 
 #--------------------Botones----------------
 # Boton para Seleccionar Archivo

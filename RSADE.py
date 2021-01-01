@@ -115,7 +115,9 @@ def seleccionarArchivo():
     filename = askopenfilename() # show an "Open" dialog box and return the path to the selected file
     print(filename)
     miArchivo.set(filename)
-    archivo.configure(text=filename, font=(12)) 
+    n=filename.rfind('/')
+    nombreArchivo=filename[n+1:]
+    archivo.configure(text=nombreArchivo, font=(12)) 
     
 def comprobar(nsta):
     if nsta == "":
@@ -174,7 +176,7 @@ def graficarAr():
         p_pick, s_pick = ar_pick(trace1.data, trace2.data, trace3.data, df, float(f1), float(f2), float(lta_p), float(sta_p),
                                  float(lta_s), float(sta_s), int(m_p), int(m_s), float(l_p), float(l_s))
         
-        f = plt.Figure(figsize=(16, 9))
+        f = plt.Figure(figsize=(16, 8))
         a = f.add_subplot(211)
         #ax = a.subplot(211)
         a.plot(trace1.data, 'k')
@@ -183,9 +185,11 @@ def graficarAr():
         a.axvline(x=s_pick*100,linewidth=2, color='b')
         
         global canvas
+        global toolbar
         #se intenta borrar la grafica en caso de que ya este dibujada en la interfaz
         try:
             canvas.get_tk_widget().pack_forget() # use the delete method here
+            toolbar.pack_forget()
         except:
             pass
         
@@ -243,7 +247,7 @@ def graficarBaer():
         #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
         on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
         # Plotting the results
-        f = plt.Figure(figsize=(16, 9))
+        f = plt.Figure(figsize=(16, 8))
         a = f.add_subplot(211)
         #ax = a.subplot(211)
         a.plot(trace.data, 'k')
@@ -258,9 +262,11 @@ def graficarBaer():
         #plt.show()
         #global canvas
         global canvas
+        global toolbar
         #se intenta borrar la grafica en caso de que ya este dibujada en la interfaz
         try:
             canvas.get_tk_widget().pack_forget() # use the delete method here
+            toolbar.pack_forget()
         except:
             pass
         
@@ -316,7 +322,7 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
         #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
         on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
         # Plotting the results
-        f = plt.Figure(figsize=(16, 9))
+        f = plt.Figure(figsize=(16, 8))
         a = f.add_subplot(211)
         #ax = a.subplot(211)
         a.plot(trace.data, 'k')
@@ -331,9 +337,11 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
         #plt.show()
         #global canvas
         global canvas
+        global toolbar
         #se intenta borrar la grafica en caso de que ya este dibujada en la interfaz
         try:
             canvas.get_tk_widget().pack_forget() # use the delete method here
+            toolbar.pack_forget()
         except:
             pass
         
@@ -673,6 +681,7 @@ def eliminarParametros():
 raiz=Tk()
 
 raiz.title("Red Sísmica del Austro")
+raiz.attributes('-zoomed', True)
 
 #agregar imagen a la ventana
 #raiz.iconbitmap("ucuenca.ico")
@@ -833,7 +842,5 @@ obtenerMiniSeedBtn=Button(miFrame, text="Obtener miniSeed", command=guardarMiniS
 #miImagen = PhotoImage(file="p7.png")
 #Label(miFrame, image=miImagen).grid(row=5, column=0, columnspan=7)
 
-#pantalla completa
-raiz.state('zoomed')
 
 raiz.mainloop()

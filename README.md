@@ -35,13 +35,13 @@ Esta herramienta sirve para diferentes algoritmos disponibles en [ObsPy](https:/
     <img src="https://res.cloudinary.com/dzgd10ssq/image/upload/v1609543282/tesis/madzogzsxzhg2gzwsfgd.png" width="600"/ hspace="5"> 
  </p>
  
- - P-picker routine by M. Baer, Schweizer Erdbebendienst. Para este algoritmo se tiene la siguietne interfaz. Los parámetros necesarios se pueden consultar en la siguiente [documentación](https://docs.obspy.org/packages/autogen/obspy.signal.trigger.pk_baer.html#obspy.signal.trigger.pk_baer "documentación") 
+ - P-picker routine by M. Baer, Schweizer Erdbebendienst. Para este algoritmo se tiene la siguiente interfaz. Los parámetros necesarios se pueden consultar en la siguiente [documentación](https://docs.obspy.org/packages/autogen/obspy.signal.trigger.pk_baer.html#obspy.signal.trigger.pk_baer "documentación") 
 
  <p>
      <img src="https://res.cloudinary.com/dzgd10ssq/image/upload/v1609543282/tesis/kjaeot8niqhsbuhyvoxf.png" width="600"/ hspace="5"> 
  </p>
 
-- Pick P and S arrivals with an AR-AIC + STA/LTA algorithm. Para este algoritmo se tiene  la sigueinte interfaz. Los parámetros necesarios se pueden consultar en la siguiente [documentación](https://docs.obspy.org/packages/autogen/obspy.signal.trigger.ar_pick.html#obspy.signal.trigger.ar_pick "documentación") 
+- Pick P and S arrivals with an AR-AIC + STA/LTA algorithm. Para este algoritmo se tiene  la siguiente interfaz. Los parámetros necesarios se pueden consultar en la siguiente [documentación](https://docs.obspy.org/packages/autogen/obspy.signal.trigger.ar_pick.html#obspy.signal.trigger.ar_pick "documentación") 
  <p>
      <img src="https://res.cloudinary.com/dzgd10ssq/image/upload/v1609543282/tesis/xc6itwca6ibfvbxyep4w.png" width="600"/ hspace="5"> 
  </p>

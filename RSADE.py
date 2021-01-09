@@ -477,11 +477,11 @@ def eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fac
             for j in range(len(on_of[i])):
                 sec = timedelta(seconds=on_of[i][j])
                 evetos_obtenidos.append(str(sec))
-                
+        print(np.array(evetos_obtenidos).reshape(len(on_of), 2))      
         nombrearch=fd.asksaveasfilename(initialdir = path ,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
         if nombrearch!='':
             archi1=open(nombrearch, "w", encoding="utf-8")
-            archi1.write(str(evetos_obtenidos))
+            archi1.write(str(np.array(evetos_obtenidos).reshape(len(on_of), 2)))
             archi1.close()
             mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
             

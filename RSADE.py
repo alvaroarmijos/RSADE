@@ -415,10 +415,16 @@ def eventosBaer():
         on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
         path=os.path.abspath(os.getcwd())
         on_of=on_of/df
+        evetos_obtenidos=[]
+        #funcion para converitr las meustras en horas minutos y segundos
+        for i in range(len(on_of)):
+            for j in range(len(on_of[i])):
+                sec = timedelta(seconds=on_of[i][j])
+                evetos_obtenidos.append(str(sec))
         nombrearch=fd.asksaveasfilename(initialdir = path,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
         if nombrearch!='':
             archi1=open(nombrearch, "w", encoding="utf-8")
-            archi1.write(str(on_of))
+            archi1.write(str(evetos_obtenidos))
             archi1.close()
             mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
         
@@ -465,17 +471,17 @@ def eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fac
         on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
         path=os.path.abspath(os.getcwd())
         on_of=on_of/df
-        eventos_date = np.empty((len(on_of),2), dtype=str)
-        
+        evetos_obtenidos=[]
         #funcion para converitr las meustras en horas minutos y segundos
         for i in range(len(on_of)):
             for j in range(len(on_of[i])):
                 sec = timedelta(seconds=on_of[i][j])
-                eventos_date[i][j]=str(sec)
+                evetos_obtenidos.append(str(sec))
+                
         nombrearch=fd.asksaveasfilename(initialdir = path ,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
         if nombrearch!='':
             archi1=open(nombrearch, "w", encoding="utf-8")
-            archi1.write(str(eventos_date))
+            archi1.write(str(evetos_obtenidos))
             archi1.close()
             mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
             

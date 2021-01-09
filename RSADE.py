@@ -421,10 +421,11 @@ def eventosBaer():
             for j in range(len(on_of[i])):
                 sec = timedelta(seconds=on_of[i][j])
                 evetos_obtenidos.append(str(sec))
+        print(np.array(evetos_obtenidos).reshape(len(on_of), 2)) 
         nombrearch=fd.asksaveasfilename(initialdir = path,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
         if nombrearch!='':
             archi1=open(nombrearch, "w", encoding="utf-8")
-            archi1.write(str(evetos_obtenidos))
+            archi1.write(str(np.array(evetos_obtenidos).reshape(len(on_of), 2)))
             archi1.close()
             mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
         
@@ -441,6 +442,7 @@ def eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fac
         
         if hInicio == "" and hFin == "" :
             t = st.stats.starttime
+            ti=0
             trace = st
         else:
             ti=datetime.strptime(hInicio,"%H:%M" )
@@ -475,7 +477,11 @@ def eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fac
         #funcion para converitr las meustras en horas minutos y segundos
         for i in range(len(on_of)):
             for j in range(len(on_of[i])):
-                sec = timedelta(seconds=on_of[i][j])
+                if ti==0:
+                    sec = timedelta(seconds=on_of[i][j])
+                else:
+                    sec = timedelta(seconds=on_of[i][j]+(ti.hour * 60 + ti.minute) * 60)
+                
                 evetos_obtenidos.append(str(sec))
         print(np.array(evetos_obtenidos).reshape(len(on_of), 2))      
         nombrearch=fd.asksaveasfilename(initialdir = path ,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))

@@ -10,6 +10,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
+from datetime import date
+from datetime import datetime, timedelta
 
 #-------------------------Variables--------------------------------------------
 
@@ -111,13 +113,20 @@ def guardarMiniSeed():
     
 
 def seleccionarArchivo():
+    global init_time, end_time
     Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
     filename = askopenfilename() # show an "Open" dialog box and return the path to the selected file
     print(filename)
     miArchivo.set(filename)
     n=filename.rfind('/')
     nombreArchivo=filename[n+1:]
-    archivo.configure(text=nombreArchivo, font=(12)) 
+    archivo.configure(text='Archivo seleccionado: ' + nombreArchivo, font=(12))
+    st = obspy.read(miArchivo.get())[0]
+    print(st)
+    init_time = st.stats.starttime.strftime('%H:%M:%S')
+    end_time = st.stats.endtime.strftime('%H:%M:%S')
+    data.configure(text='Datos del archivo =>       Hora de Inicio: '+init_time + '           Hora final: '+end_time, font=(12))
+    
     
 def comprobar(nsta):
     if nsta == "":
@@ -157,9 +166,11 @@ def graficarAr():
             trace3 = st[2]#.trim(t1,t2)
         else:
             t = st[0].stats.starttime
-            t1 = t + 3600 * float(hInicio)
-            #t1 = t
-            t2 = t + 3600 * float(hFin)
+            ti=datetime.strptime(hInicio,"%H:%M" )
+            tf=datetime.strptime(hFin,"%H:%M" )
+            #t1 = t + 3600 * float(hInicio)
+            t1 = t + (ti.hour * 60 + ti.minute) * 60
+            t2 = t + (tf.hour * 60 + tf.minute) * 60
             trace1 = st[0].trim(t1,t2)
             trace2 = st[1].trim(t1,t2)
             trace3 = st[2].trim(t1,t2)
@@ -229,11 +240,12 @@ def graficarBaer():
             t = st.stats.starttime
             trace = st
         else:
+            ti=datetime.strptime(hInicio,"%H:%M" )
+            tf=datetime.strptime(hFin,"%H:%M" )
             t = st.stats.starttime
-            t1 = t + 3600 * float(hInicio)
-            #t1 = t
-            t2 = t + 3600 * float(hFin)
-            #t2 = st.stats.endtime
+            #t1 = t + 3600 * float(hInicio)
+            t1 = t + (ti.hour * 60 + ti.minute) * 60
+            t2 = t + (tf.hour * 60 + tf.minute) * 60
             trace = st.trim(t1,t2)
         trace.data = trace.data/float(factorConversion)
         trace.filter('bandpass', freqmin = 5, freqmax = 20)
@@ -293,11 +305,12 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
             t = st.stats.starttime
             trace = st
         else:
+            ti=datetime.strptime(hInicio,"%H:%M" )
+            tf=datetime.strptime(hFin,"%H:%M" )
             t = st.stats.starttime
-            t1 = t + 3600 * float(hInicio)
-            #t1 = t
-            t2 = t + 3600 * float(hFin)
-            #t2 = st.stats.endtime
+            #t1 = t + 3600 * float(hInicio)
+            t1 = t + (ti.hour * 60 + ti.minute) * 60
+            t2 = t + (tf.hour * 60 + tf.minute) * 60
             trace = st.trim(t1,t2)
         trace.data = trace.data/float(factorConversion)
         trace.filter('bandpass', freqmin = 5, freqmax = 20)
@@ -320,6 +333,7 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
             mb.showinfo("Información", "Debe seleccionar un Algoritmo correcto")
         
         #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
+        trace.data=trace.data/df
         on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
         # Plotting the results
         f = plt.Figure(figsize=(16, 8))
@@ -381,11 +395,12 @@ def eventosBaer():
             t = st.stats.starttime
             trace = st
         else:
+            ti=datetime.strptime(hInicio,"%H:%M" )
+            tf=datetime.strptime(hFin,"%H:%M" )
             t = st.stats.starttime
-            t1 = t + 3600 * float(hInicio)
-            #t1 = t
-            t2 = t + 3600 * float(hFin)
-            #t2 = st.stats.endtime
+            #t1 = t + 3600 * float(hInicio)
+            t1 = t + (ti.hour * 60 + ti.minute) * 60
+            t2 = t + (tf.hour * 60 + tf.minute) * 60
             trace = st.trim(t1,t2)
         trace.data = trace.data/float(factorConversion)
         trace.filter('bandpass', freqmin = 5, freqmax = 20)
@@ -398,7 +413,9 @@ def eventosBaer():
         
         #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
         on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
-        nombrearch=fd.asksaveasfilename(initialdir = "/",title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
+        path=os.path.abspath(os.getcwd())
+        on_of=on_of/df
+        nombrearch=fd.asksaveasfilename(initialdir = path,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
         if nombrearch!='':
             archi1=open(nombrearch, "w", encoding="utf-8")
             archi1.write(str(on_of))
@@ -420,11 +437,12 @@ def eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fac
             t = st.stats.starttime
             trace = st
         else:
+            ti=datetime.strptime(hInicio,"%H:%M" )
+            tf=datetime.strptime(hFin,"%H:%M" )
             t = st.stats.starttime
-            t1 = t + 3600 * float(hInicio)
-            #t1 = t
-            t2 = t + 3600 * float(hFin)
-            #t2 = st.stats.endtime
+            #t1 = t + 3600 * float(hInicio)
+            t1 = t + (ti.hour * 60 + ti.minute) * 60
+            t2 = t + (tf.hour * 60 + tf.minute) * 60
             trace = st.trim(t1,t2)
         
         trace.data = trace.data/float(factorConversion)
@@ -445,10 +463,19 @@ def eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fac
             mb.showinfo("Información", "Debe seleccionar un Algoritmo correcto")
             
         on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
-        nombrearch=fd.asksaveasfilename(initialdir = "/",title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
+        path=os.path.abspath(os.getcwd())
+        on_of=on_of/df
+        eventos_date = np.empty((len(on_of),2), dtype=str)
+        
+        #funcion para converitr las meustras en horas minutos y segundos
+        for i in range(len(on_of)):
+            for j in range(len(on_of[i])):
+                sec = timedelta(seconds=on_of[i][j])
+                eventos_date[i][j]=str(sec)
+        nombrearch=fd.asksaveasfilename(initialdir = path ,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
         if nombrearch!='':
             archi1=open(nombrearch, "w", encoding="utf-8")
-            archi1.write(str(on_of))
+            archi1.write(str(eventos_date))
             archi1.close()
             mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
             
@@ -759,7 +786,11 @@ lista_desplegable.bind("<<ComboboxSelected>>", actualizarVista)
 
 ## Nombre del archivo seleccionado
 archivo=Label(miFrame, text="", font=(12))
-archivo.grid(row=3, column=1, padx=10)
+archivo.grid(row=6, column=1, columnspan=3)
+
+## data del archivo seleccionado
+data=Label(miFrame, text="", font=(12))
+data.grid(row=6, column=3, columnspan=7)
 
 #global nstaText, nltaText, triggerOnText, triggerOffText, horaInicio, horaFin
 

@@ -102,12 +102,16 @@ def guardarMiniSeed():
             t = st.stats.starttime
             trace = st
         else:
-            t = st.stats.starttime
-            t1 = t + 3600 * float(hInicio)
-            #t1 = t
-            t2 = t + 3600 * float(hFin)
-            #t2 = st.stats.endtime
-            trace = st.trim(t1,t2)
+            try:
+                t = st.stats.starttime
+                t1 = t + 3600 * float(hInicio)
+                #t1 = t
+                t2 = t + 3600 * float(hFin)
+                #t2 = st.stats.endtime
+                trace = st.trim(t1,t2)
+            except Exception:
+                mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
+                
         trace.write(miArchivo.get()+hInicio+"-"+hFin+'.mseed', format='MSEED')
         mb.showinfo("Información", "Archivo guardado correctamente en: " + miArchivo.get()+hInicio+"-"+hFin+'.mseed')
     
@@ -167,15 +171,18 @@ def graficarAr():
             trace2 = st[1]#.trim(t1,t2)
             trace3 = st[2]#.trim(t1,t2)
         else:
-            t = st[0].stats.starttime
-            ti=datetime.strptime(hInicio,"%H:%M" )
-            tf=datetime.strptime(hFin,"%H:%M" )
-            #t1 = t + 3600 * float(hInicio)
-            t1 = t + (ti.hour * 60 + ti.minute) * 60
-            t2 = t + (tf.hour * 60 + tf.minute) * 60
-            trace1 = st[0].trim(t1,t2)
-            trace2 = st[1].trim(t1,t2)
-            trace3 = st[2].trim(t1,t2)
+            try:
+                t = st[0].stats.starttime
+                ti=datetime.strptime(hInicio,"%H:%M" )
+                tf=datetime.strptime(hFin,"%H:%M" )
+                #t1 = t + 3600 * float(hInicio)
+                t1 = t + (ti.hour * 60 + ti.minute) * 60
+                t2 = t + (tf.hour * 60 + tf.minute) * 60
+                trace1 = st[0].trim(t1,t2)
+                trace2 = st[1].trim(t1,t2)
+                trace3 = st[2].trim(t1,t2)
+            except Exception:
+                mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
             
         
         trace1.data = trace1.data/float(factorConversion)
@@ -248,13 +255,16 @@ def graficarBaer():
             t1=t
             trace = st
         else:
-            ti=datetime.strptime(hInicio,"%H:%M" )
-            tf=datetime.strptime(hFin,"%H:%M" )
-            t = st.stats.starttime
-            #t1 = t + 3600 * float(hInicio)
-            t1 = t + (ti.hour * 60 + ti.minute) * 60
-            t2 = t + (tf.hour * 60 + tf.minute) * 60
-            trace = st.trim(t1,t2)
+            try:
+                ti=datetime.strptime(hInicio,"%H:%M" )
+                tf=datetime.strptime(hFin,"%H:%M" )
+                t = st.stats.starttime
+                #t1 = t + 3600 * float(hInicio)
+                t1 = t + (ti.hour * 60 + ti.minute) * 60
+                t2 = t + (tf.hour * 60 + tf.minute) * 60
+                trace = st.trim(t1,t2)
+            except Exception:
+                mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
         trace.data = trace.data/float(factorConversion)
         trace.filter('bandpass', freqmin = 5, freqmax = 20)
         df = trace.stats.sampling_rate
@@ -321,13 +331,16 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
             trace = st
             ti=0
         else:
-            ti=datetime.strptime(hInicio,"%H:%M" )
-            tf=datetime.strptime(hFin,"%H:%M" )
-            t = st.stats.starttime
-            #t1 = t + 3600 * float(hInicio)
-            t1 = t + (ti.hour * 60 + ti.minute) * 60
-            t2 = t + (tf.hour * 60 + tf.minute) * 60
-            trace = st.trim(t1,t2)
+            try:
+                ti=datetime.strptime(hInicio,"%H:%M" )
+                tf=datetime.strptime(hFin,"%H:%M" )
+                t = st.stats.starttime
+                #t1 = t + 3600 * float(hInicio)
+                t1 = t + (ti.hour * 60 + ti.minute) * 60
+                t2 = t + (tf.hour * 60 + tf.minute) * 60
+                trace = st.trim(t1,t2)
+            except Exception:
+                mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
         trace.data = trace.data/float(factorConversion)
         trace.filter('bandpass', freqmin = 5, freqmax = 20)
         df = trace.stats.sampling_rate
@@ -421,13 +434,16 @@ def eventosBaer():
             trace = st
             ti=0
         else:
-            ti=datetime.strptime(hInicio,"%H:%M" )
-            tf=datetime.strptime(hFin,"%H:%M" )
-            t = st.stats.starttime
-            #t1 = t + 3600 * float(hInicio)
-            t1 = t + (ti.hour * 60 + ti.minute) * 60
-            t2 = t + (tf.hour * 60 + tf.minute) * 60
-            trace = st.trim(t1,t2)
+            try:
+                ti=datetime.strptime(hInicio,"%H:%M" )
+                tf=datetime.strptime(hFin,"%H:%M" )
+                t = st.stats.starttime
+                #t1 = t + 3600 * float(hInicio)
+                t1 = t + (ti.hour * 60 + ti.minute) * 60
+                t2 = t + (tf.hour * 60 + tf.minute) * 60
+                trace = st.trim(t1,t2)
+            except Exception:
+                mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
         trace.data = trace.data/float(factorConversion)
         trace.filter('bandpass', freqmin = 5, freqmax = 20)
         df = trace.stats.sampling_rate
@@ -474,13 +490,16 @@ def eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fac
             ti=0
             trace = st
         else:
-            ti=datetime.strptime(hInicio,"%H:%M" )
-            tf=datetime.strptime(hFin,"%H:%M" )
-            t = st.stats.starttime
-            #t1 = t + 3600 * float(hInicio)
-            t1 = t + (ti.hour * 60 + ti.minute) * 60
-            t2 = t + (tf.hour * 60 + tf.minute) * 60
-            trace = st.trim(t1,t2)
+            try:
+                ti=datetime.strptime(hInicio,"%H:%M" )
+                tf=datetime.strptime(hFin,"%H:%M" )
+                t = st.stats.starttime
+                #t1 = t + 3600 * float(hInicio)
+                t1 = t + (ti.hour * 60 + ti.minute) * 60
+                t2 = t + (tf.hour * 60 + tf.minute) * 60
+                trace = st.trim(t1,t2)
+            except Exception:
+                mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
         
         trace.data = trace.data/float(factorConversion)
         trace.filter('bandpass', freqmin = 5, freqmax = 20)

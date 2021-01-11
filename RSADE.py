@@ -161,6 +161,8 @@ def graficarAr():
         st = obspy.read(miArchivo.get())
         
         if hInicio == "" and hFin == "" :
+            t = st[0].stats.starttime
+            t1=t
             trace1 = st[0]#.trim(t1,t2)
             trace2 = st[1]#.trim(t1,t2)
             trace3 = st[2]#.trim(t1,t2)
@@ -187,13 +189,18 @@ def graficarAr():
         p_pick, s_pick = ar_pick(trace1.data, trace2.data, trace3.data, df, float(f1), float(f2), float(lta_p), float(sta_p),
                                  float(lta_s), float(sta_s), int(m_p), int(m_s), float(l_p), float(l_s))
         
+        
+        segundos=(t1.hour * 60 + t1.minute)*60
+        
         f = plt.Figure(figsize=(16, 8))
         a = f.add_subplot(211)
         #ax = a.subplot(211)
         a.plot(trace1.data, 'k')
         ymin, ymax = a.get_ylim()
+        a.set_xticklabels(segundos+a.get_xticks()/64)
         a.axvline(x=p_pick*100,linewidth=2, color='r')
         a.axvline(x=s_pick*100,linewidth=2, color='b')
+        a.set_xlabel('Segundos [s]')
         
         global canvas
         global toolbar
@@ -238,6 +245,7 @@ def graficarBaer():
         
         if hInicio == "" and hFin == "" :
             t = st.stats.starttime
+            t1=t
             trace = st
         else:
             ti=datetime.strptime(hInicio,"%H:%M" )
@@ -259,18 +267,24 @@ def graficarBaer():
         #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
         on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
         # Plotting the results
+        
+        segundos=(t1.hour * 60 + t1.minute)*60
         f = plt.Figure(figsize=(16, 8))
         a = f.add_subplot(211)
         #ax = a.subplot(211)
         a.plot(trace.data, 'k')
         ymin, ymax = a.get_ylim()
+        a.set_xticklabels(segundos+a.get_xticks()/64)
         a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
         a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
+        a.set_xlabel('Segundos [s]')
         b = f.add_subplot(212)
         #b.subplot(212, sharex=ax)
         b.plot(cft, 'k')
+        b.set_xticklabels(segundos+b.get_xticks()/64)
         b.hlines([3.5, 0.5], 0, len(cft), color=['r', 'b'], linestyle='--')
         b.axis('tight')
+        b.set_xlabel('Segundos [s]')
         #plt.show()
         #global canvas
         global canvas
@@ -303,7 +317,9 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
         
         if hInicio == "" and hFin == "" :
             t = st.stats.starttime
+            t1=t
             trace = st
+            ti=0
         else:
             ti=datetime.strptime(hInicio,"%H:%M" )
             tf=datetime.strptime(hFin,"%H:%M" )
@@ -333,20 +349,29 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
             mb.showinfo("Información", "Debe seleccionar un Algoritmo correcto")
         
         #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
-        trace.data=trace.data/df
+        
         on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
+        datalabel=trace.data/df
         # Plotting the results
-        f = plt.Figure(figsize=(16, 8))
-        a = f.add_subplot(211)
+        
+        segundos=(t1.hour * 60 + t1.minute)*60
+        f= plt.Figure(figsize=(16, 8))
+        a= f.add_subplot(211)
         #ax = a.subplot(211)
         a.plot(trace.data, 'k')
+        #on_of=on_of*df
         ymin, ymax = a.get_ylim()
+        a.set_xticklabels(segundos+a.get_xticks()/64)
         a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
         a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
+        a.set_xlabel('Segundos [s]')
+        
         b = f.add_subplot(212)
         #b.subplot(212, sharex=ax)
         b.plot(cft, 'k')
+        b.set_xticklabels(segundos+b.get_xticks()/64)
         b.hlines([3.5, 0.5], 0, len(cft), color=['r', 'b'], linestyle='--')
+        b.set_xlabel('Segundos [s]')
         b.axis('tight')
         #plt.show()
         #global canvas
@@ -394,6 +419,7 @@ def eventosBaer():
         if hInicio == "" and hFin == "" :
             t = st.stats.starttime
             trace = st
+            ti=0
         else:
             ti=datetime.strptime(hInicio,"%H:%M" )
             tf=datetime.strptime(hFin,"%H:%M" )
@@ -419,7 +445,10 @@ def eventosBaer():
         #funcion para converitr las meustras en horas minutos y segundos
         for i in range(len(on_of)):
             for j in range(len(on_of[i])):
-                sec = timedelta(seconds=on_of[i][j])
+                if ti==0:
+                    sec = timedelta(seconds=on_of[i][j])
+                else:
+                    sec = timedelta(seconds=on_of[i][j]+(ti.hour * 60 + ti.minute) * 60)
                 evetos_obtenidos.append(str(sec))
         print(np.array(evetos_obtenidos).reshape(len(on_of), 2)) 
         nombrearch=fd.asksaveasfilename(initialdir = path,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))

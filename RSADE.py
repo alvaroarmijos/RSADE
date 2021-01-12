@@ -103,11 +103,12 @@ def guardarMiniSeed():
             trace = st
         else:
             try:
+                ti=datetime.strptime(hInicio,"%H:%M" )
+                tf=datetime.strptime(hFin,"%H:%M" )
                 t = st.stats.starttime
-                t1 = t + 3600 * float(hInicio)
-                #t1 = t
-                t2 = t + 3600 * float(hFin)
-                #t2 = st.stats.endtime
+                #t1 = t + 3600 * float(hInicio)
+                t1 = t + (ti.hour * 60 + ti.minute) * 60
+                t2 = t + (tf.hour * 60 + tf.minute) * 60
                 trace = st.trim(t1,t2)
             except Exception:
                 mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')

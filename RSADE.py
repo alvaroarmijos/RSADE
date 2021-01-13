@@ -38,16 +38,17 @@ def graficarEvento():
         hInicio          = horaInicio.get()
         hFin             = horaFin.get()
         factorConversion = factorConversionText.get()
+        canalText        = canal.get()
         
 
         if miAlgoritmo == "Classic STA/LTA":
-            graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 1, factorConversion)
+            graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 1, factorConversion, canalText)
         elif miAlgoritmo == "Recursive STA/LTA":
-            graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 2, factorConversion)
+            graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 2, factorConversion, canalText)
         elif miAlgoritmo == "Delayed STA/LTA":
-            graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 3, factorConversion)
+            graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 3, factorConversion, canalText)
         elif miAlgoritmo == "Z-detector":
-            graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 4, factorConversion)
+            graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 4, factorConversion, canalText)
         elif miAlgoritmo == "Baer- and Kradolfer-picker":
             graficarBaer()
         elif miAlgoritmo == "AR-AIC":
@@ -73,16 +74,18 @@ def obtenerEvento():
         hInicio     = horaInicio.get()
         hFin        = horaFin.get()
         factorConversion = factorConversionText.get()
+        canalText        = canal.get()
+        
         
 
         if miAlgoritmo == "Classic STA/LTA":
-            eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 1, factorConversion)
+            eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 1, factorConversion, canalText)
         elif miAlgoritmo == "Recursive STA/LTA":
-            eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 2, factorConversion)
+            eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 2, factorConversion, canalText)
         elif miAlgoritmo == "Delayed STA/LTA":
-            eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 3, factorConversion)
+            eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 3, factorConversion, canalText)
         elif miAlgoritmo == "Z-detector":
-            eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 4, factorConversion)
+            eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, 4, factorConversion, canalText)
         elif miAlgoritmo == "Baer- and Kradolfer-picker":
             eventosBaer()
         else:
@@ -92,29 +95,44 @@ def guardarMiniSeed():
     
     hInicio     = horaInicio.get()
     hFin        = horaFin.get()
+    canalText   = canal.get()
     
     if miArchivo.get()=="":
         mb.showinfo("Información", "Debe seleccionar un archivo de eventos antes de Guardar otro")
     else:
-        st = obspy.read(miArchivo.get())[0]
         
-        if hInicio == "" and hFin == "" :
-            t = st.stats.starttime
-            trace = st
-        else:
-            try:
-                ti=datetime.strptime(hInicio,"%H:%M" )
-                tf=datetime.strptime(hFin,"%H:%M" )
-                t = st.stats.starttime
-                #t1 = t + 3600 * float(hInicio)
-                t1 = t + (ti.hour * 60 + ti.minute) * 60
-                t2 = t + (tf.hour * 60 + tf.minute) * 60
-                trace = st.trim(t1,t2)
-            except Exception:
-                mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
+        try:
+            canal1 = int(canalText)
+        except Exception:
+                mb.showerror("Error", 'Valor del canal mal ingresado, debe ser un número')
                 
-        trace.write(miArchivo.get()+hInicio+"-"+hFin+'.mseed', format='MSEED')
-        mb.showinfo("Información", "Archivo guardado correctamente en: " + miArchivo.get()+hInicio+"-"+hFin+'.mseed')
+        if (canal1<0 or canal1 > 2):
+            mb.showerror("Error", 'El canal debe estar entre 0 y 2')
+        else:
+            
+            try:
+                
+                st = obspy.read(miArchivo.get())[canal1]
+            except Exception:
+                mb.showerror("Error", 'El archivo seleccionado no tiene ese canal')
+        
+            if hInicio == "" and hFin == "" :
+                t = st.stats.starttime
+                trace = st
+            else:
+                try:
+                    ti=datetime.strptime(hInicio,"%H:%M" )
+                    tf=datetime.strptime(hFin,"%H:%M" )
+                    t = st.stats.starttime
+                    #t1 = t + 3600 * float(hInicio)
+                    t1 = t + (ti.hour * 60 + ti.minute) * 60
+                    t2 = t + (tf.hour * 60 + tf.minute) * 60
+                    trace = st.trim(t1,t2)
+                except Exception:
+                    mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
+                    
+            trace.write(miArchivo.get()+hInicio+"-"+hFin+'.mseed', format='MSEED')
+            mb.showinfo("Información", "Archivo guardado correctamente en: " + miArchivo.get()+hInicio+"-"+hFin+'.mseed')
     
 
 def seleccionarArchivo():
@@ -168,9 +186,12 @@ def graficarAr():
         if hInicio == "" and hFin == "" :
             t = st[0].stats.starttime
             t1=t
-            trace1 = st[0]#.trim(t1,t2)
-            trace2 = st[1]#.trim(t1,t2)
-            trace3 = st[2]#.trim(t1,t2)
+            try: 
+                trace1 = st[0]#.trim(t1,t2)
+                trace2 = st[1]#.trim(t1,t2)
+                trace3 = st[2]#.trim(t1,t2)
+            except Exception:
+                    mb.showerror("Error", 'El archivo seleccionado no tiene 3 canales')
         else:
             try:
                 t = st[0].stats.starttime
@@ -179,9 +200,12 @@ def graficarAr():
                 #t1 = t + 3600 * float(hInicio)
                 t1 = t + (ti.hour * 60 + ti.minute) * 60
                 t2 = t + (tf.hour * 60 + tf.minute) * 60
-                trace1 = st[0].trim(t1,t2)
-                trace2 = st[1].trim(t1,t2)
-                trace3 = st[2].trim(t1,t2)
+                try:
+                    trace1 = st[0].trim(t1,t2)
+                    trace2 = st[1].trim(t1,t2)
+                    trace3 = st[2].trim(t1,t2)
+                except Exception:
+                    mb.showerror("Error", 'El archivo seleccionado no tiene 3 canales')
             except Exception:
                 mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
             
@@ -244,169 +268,197 @@ def graficarBaer():
     preset_len  = preset_lenText.get()
     p_dur       = p_durText.get()
     factorConversion = factorConversionText.get()
+    canalText = canal.get()
     
     
-    if tdownmax=="" or tupevent=="" or triggerOn=="" or triggerOff=="" or thr1=="" or thr2=="" or preset_len=="" or p_dur=="" or factorConversion=="":
+    if tdownmax=="" or tupevent=="" or triggerOn=="" or triggerOff=="" or thr1=="" or thr2=="" or preset_len=="" or p_dur=="" or canalText == "" or factorConversion=="":
         mb.showinfo("Información", "Debe ingresar los parámetros necesarios antes de Graficar")
     else:
-        st = obspy.read(miArchivo.get())[0]
-        
-        if hInicio == "" and hFin == "" :
-            t = st.stats.starttime
-            t1=t
-            trace = st
-        else:
-            try:
-                ti=datetime.strptime(hInicio,"%H:%M" )
-                tf=datetime.strptime(hFin,"%H:%M" )
-                t = st.stats.starttime
-                #t1 = t + 3600 * float(hInicio)
-                t1 = t + (ti.hour * 60 + ti.minute) * 60
-                t2 = t + (tf.hour * 60 + tf.minute) * 60
-                trace = st.trim(t1,t2)
-            except Exception:
-                mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
-        trace.data = trace.data/float(factorConversion)
-        trace.filter('bandpass', freqmin = 5, freqmax = 20)
-        df = trace.stats.sampling_rate
-        print(int(int(preset_len)*df))
-        print(float(p_dur))
-        p_pick, phase_info, cft = pk_baer(trace.data, df, int(tdownmax), int(float(tupevent)*df), float(thr1), float(thr2),
-                                          int(int(preset_len)*df), int(p_dur), True)
-        cft=np.append(cft, 0)
-        
-        #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
-        on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
-        # Plotting the results
-        
-        segundos=(t1.hour * 60 + t1.minute)*60
-        f = plt.Figure(figsize=(16, 8))
-        a = f.add_subplot(211)
-        #ax = a.subplot(211)
-        a.plot(trace.data, 'k')
-        ymin, ymax = a.get_ylim()
-        a.set_xticklabels(segundos+a.get_xticks()/64)
-        a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
-        a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
-        a.set_xlabel('Segundos [s]')
-        b = f.add_subplot(212)
-        #b.subplot(212, sharex=ax)
-        b.plot(cft, 'k')
-        b.set_xticklabels(segundos+b.get_xticks()/64)
-        b.hlines([3.5, 0.5], 0, len(cft), color=['r', 'b'], linestyle='--')
-        b.axis('tight')
-        b.set_xlabel('Segundos [s]')
-        #plt.show()
-        #global canvas
-        global canvas
-        global toolbar
-        #se intenta borrar la grafica en caso de que ya este dibujada en la interfaz
         try:
-            canvas.get_tk_widget().pack_forget() # use the delete method here
-            toolbar.pack_forget()
-        except:
-            pass
-        
-        
-        canvas = FigureCanvasTkAgg(f, top_frame)
-        
-        canvas.get_tk_widget().pack(side="left", fill="both")
-        canvas.draw()
-
-        toolbar = NavigationToolbar2Tk(canvas, bottom_frame)
-        toolbar.update()
-        canvas._tkcanvas.pack(side="left", fill="both")
-    
-    
-    
-def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, factorConversion):
-    
-    if nsta=="" or triggerOn=="" or triggerOff=="" or factorConversion=="":
-        mb.showinfo("Información", "Debe ingresar los parámetros necesarios antes de Graficar")
-    else:
-        st = obspy.read(miArchivo.get())[0]
-        
-        if hInicio == "" and hFin == "" :
-            t = st.stats.starttime
-            t1=t
-            trace = st
-            ti=0
+            canal1 = int(canalText)
+        except Exception:
+                mb.showerror("Error", 'Valor del canal mal ingresado, debe ser un número')
+                
+        if (canal1<0 or canal1 > 2):
+            mb.showerror("Error", 'El canal debe estar entre 0 y 2')
         else:
+            
             try:
-                ti=datetime.strptime(hInicio,"%H:%M" )
-                tf=datetime.strptime(hFin,"%H:%M" )
-                t = st.stats.starttime
-                #t1 = t + 3600 * float(hInicio)
-                t1 = t + (ti.hour * 60 + ti.minute) * 60
-                t2 = t + (tf.hour * 60 + tf.minute) * 60
-                trace = st.trim(t1,t2)
+                
+                st = obspy.read(miArchivo.get())[canal1]
             except Exception:
-                mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
-        trace.data = trace.data/float(factorConversion)
-        trace.filter('bandpass', freqmin = 5, freqmax = 20)
-        df = trace.stats.sampling_rate
+                mb.showerror("Error", 'El archivo seleccionado no tiene ese canal')
         
-        # se define el tipo de algoritmo a usar
-        #1 = "Classic STA/LTA", 2 = "Recursive STA/LTA", 3 = "Delayed STA/LTA", 4 = "Z-detector", 5="Baer- and Kradolfer-picker", 6 = "AR-AIC"
-        if tipoAlgoritmo == 1:
-            cft = classic_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
-        elif tipoAlgoritmo == 2:
-            cft = recursive_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
-        elif tipoAlgoritmo == 3:
-            cft = delayed_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
-        elif tipoAlgoritmo == 4:
-            cft = z_detect(trace.data, int(float(nsta) * df))
-        elif tipoAlgoritmo == 5:
-            p_pick, phase_info, cft = pk_baer(trace.data, df, 1, int(float(nsta)*df), 10, 2, int(float(nlta)*df), 6, True)
+            if hInicio == "" and hFin == "" :
+                t = st.stats.starttime
+                t1=t
+                trace = st
+            else:
+                try:
+                    ti=datetime.strptime(hInicio,"%H:%M" )
+                    tf=datetime.strptime(hFin,"%H:%M" )
+                    t = st.stats.starttime
+                    #t1 = t + 3600 * float(hInicio)
+                    t1 = t + (ti.hour * 60 + ti.minute) * 60
+                    t2 = t + (tf.hour * 60 + tf.minute) * 60
+                    trace = st.trim(t1,t2)
+                except Exception:
+                    mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
+            trace.data = trace.data/float(factorConversion)
+            trace.filter('bandpass', freqmin = 5, freqmax = 20)
+            df = trace.stats.sampling_rate
+            print(int(int(preset_len)*df))
+            print(float(p_dur))
+            p_pick, phase_info, cft = pk_baer(trace.data, df, int(tdownmax), int(float(tupevent)*df), float(thr1), float(thr2),
+                                              int(int(preset_len)*df), int(p_dur), True)
             cft=np.append(cft, 0)
-        else:
-            mb.showinfo("Información", "Debe seleccionar un Algoritmo correcto")
-        
-        #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
-        
-        on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
-        datalabel=trace.data/df
-        # Plotting the results
-        
-        segundos=(t1.hour * 60 + t1.minute)*60
-        f= plt.Figure(figsize=(16, 8))
-        a= f.add_subplot(211)
-        #ax = a.subplot(211)
-        a.plot(trace.data, 'k')
-        #on_of=on_of*df
-        ymin, ymax = a.get_ylim()
-        a.set_xticklabels(segundos+a.get_xticks()/64)
-        a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
-        a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
-        a.set_xlabel('Segundos [s]')
-        
-        b = f.add_subplot(212)
-        #b.subplot(212, sharex=ax)
-        b.plot(cft, 'k')
-        b.set_xticklabels(segundos+b.get_xticks()/64)
-        b.hlines([3.5, 0.5], 0, len(cft), color=['r', 'b'], linestyle='--')
-        b.set_xlabel('Segundos [s]')
-        b.axis('tight')
-        #plt.show()
-        #global canvas
-        global canvas
-        global toolbar
-        #se intenta borrar la grafica en caso de que ya este dibujada en la interfaz
-        try:
-            canvas.get_tk_widget().pack_forget() # use the delete method here
-            toolbar.pack_forget()
-        except:
-            pass
-        
-        
-        canvas = FigureCanvasTkAgg(f, top_frame)
-        
-        canvas.get_tk_widget().pack(side="left", fill="both")
-        canvas.draw()
+            
+            #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
+            on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
+            # Plotting the results
+            
+            segundos=(t1.hour * 60 + t1.minute)*60
+            f = plt.Figure(figsize=(16, 8))
+            a = f.add_subplot(211)
+            #ax = a.subplot(211)
+            a.plot(trace.data, 'k')
+            ymin, ymax = a.get_ylim()
+            a.set_xticklabels(segundos+a.get_xticks()/64)
+            a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
+            a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
+            a.set_xlabel('Segundos [s]')
+            b = f.add_subplot(212)
+            #b.subplot(212, sharex=ax)
+            b.plot(cft, 'k')
+            b.set_xticklabels(segundos+b.get_xticks()/64)
+            b.hlines([3.5, 0.5], 0, len(cft), color=['r', 'b'], linestyle='--')
+            b.axis('tight')
+            b.set_xlabel('Segundos [s]')
+            #plt.show()
+            #global canvas
+            global canvas
+            global toolbar
+            #se intenta borrar la grafica en caso de que ya este dibujada en la interfaz
+            try:
+                canvas.get_tk_widget().pack_forget() # use the delete method here
+                toolbar.pack_forget()
+            except:
+                pass
+            
+            
+            canvas = FigureCanvasTkAgg(f, top_frame)
+            
+            canvas.get_tk_widget().pack(side="left", fill="both")
+            canvas.draw()
 
-        toolbar = NavigationToolbar2Tk(canvas, bottom_frame)
-        toolbar.update()
-        canvas._tkcanvas.pack(side="left", fill="both")
+            toolbar = NavigationToolbar2Tk(canvas, bottom_frame)
+            toolbar.update()
+            canvas._tkcanvas.pack(side="left", fill="both")
+    
+    
+    
+def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, factorConversion, canalText):
+    
+    if nsta=="" or triggerOn=="" or triggerOff=="" or factorConversion=="" or canalText == "":
+        mb.showinfo("Información", "Debe ingresar los parámetros necesarios antes de Graficar")
+    else:
+        
+        try:
+            canal = int(canalText)
+        except Exception:
+                mb.showerror("Error", 'Valor del canal mal ingresado, debe ser un número')
+                
+        if (canal<0 or canal > 2):
+            mb.showerror("Error", 'El canal debe estar entre 0 y 2')
+        else:
+            
+            try:
+                
+                st = obspy.read(miArchivo.get())[canal]
+            except Exception:
+                mb.showerror("Error", 'El archivo seleccionado no tiene ese canal')
+            
+            if hInicio == "" and hFin == "" :
+                t = st.stats.starttime
+                t1=t
+                trace = st
+                ti=0
+            else:
+                try:
+                    ti=datetime.strptime(hInicio,"%H:%M" )
+                    tf=datetime.strptime(hFin,"%H:%M" )
+                    t = st.stats.starttime
+                    #t1 = t + 3600 * float(hInicio)
+                    t1 = t + (ti.hour * 60 + ti.minute) * 60
+                    t2 = t + (tf.hour * 60 + tf.minute) * 60
+                    trace = st.trim(t1,t2)
+                except Exception:
+                    mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
+            trace.data = trace.data/float(factorConversion)
+            trace.filter('bandpass', freqmin = 5, freqmax = 20)
+            df = trace.stats.sampling_rate
+            
+            # se define el tipo de algoritmo a usar
+            #1 = "Classic STA/LTA", 2 = "Recursive STA/LTA", 3 = "Delayed STA/LTA", 4 = "Z-detector", 5="Baer- and Kradolfer-picker", 6 = "AR-AIC"
+            if tipoAlgoritmo == 1:
+                cft = classic_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
+            elif tipoAlgoritmo == 2:
+                cft = recursive_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
+            elif tipoAlgoritmo == 3:
+                cft = delayed_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
+            elif tipoAlgoritmo == 4:
+                cft = z_detect(trace.data, int(float(nsta) * df))
+            elif tipoAlgoritmo == 5:
+                p_pick, phase_info, cft = pk_baer(trace.data, df, 1, int(float(nsta)*df), 10, 2, int(float(nlta)*df), 6, True)
+                cft=np.append(cft, 0)
+            else:
+                mb.showinfo("Información", "Debe seleccionar un Algoritmo correcto")
+            
+            #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
+            
+            on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
+            datalabel=trace.data/df
+            # Plotting the results
+            
+            segundos=(t1.hour * 60 + t1.minute)*60
+            f= plt.Figure(figsize=(16, 8))
+            a= f.add_subplot(211)
+            #ax = a.subplot(211)
+            a.plot(trace.data, 'k')
+            #on_of=on_of*df
+            ymin, ymax = a.get_ylim()
+            a.set_xticklabels(segundos+a.get_xticks()/64)
+            a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
+            a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
+            a.set_xlabel('Segundos [s]')
+            
+            b = f.add_subplot(212)
+            #b.subplot(212, sharex=ax)
+            b.plot(cft, 'k')
+            b.set_xticklabels(segundos+b.get_xticks()/64)
+            b.hlines([3.5, 0.5], 0, len(cft), color=['r', 'b'], linestyle='--')
+            b.set_xlabel('Segundos [s]')
+            b.axis('tight')
+            #plt.show()
+            #global canvas
+            global canvas
+            global toolbar
+            #se intenta borrar la grafica en caso de que ya este dibujada en la interfaz
+            try:
+                canvas.get_tk_widget().pack_forget() # use the delete method here
+                toolbar.pack_forget()
+            except:
+                pass
+            
+            
+            canvas = FigureCanvasTkAgg(f, top_frame)
+            
+            canvas.get_tk_widget().pack(side="left", fill="both")
+            canvas.draw()
+
+            toolbar = NavigationToolbar2Tk(canvas, bottom_frame)
+            toolbar.update()
+            canvas._tkcanvas.pack(side="left", fill="both")
         
 def eventosBaer():
     
@@ -423,122 +475,152 @@ def eventosBaer():
     preset_len  = preset_lenText.get()
     p_dur       = p_durText.get()
     factorConversion = factorConversionText.get()
+    canalText   = canal.get()
     
     
-    if tdownmax=="" or tupevent=="" or triggerOn=="" or triggerOff=="" or thr1=="" or thr2=="" or preset_len=="" or p_dur=="" or factorConversion=="":
+    if tdownmax=="" or tupevent=="" or triggerOn=="" or triggerOff=="" or thr1=="" or thr2=="" or preset_len=="" or canalText=="" or p_dur=="" or factorConversion=="":
         mb.showinfo("Información", "Debe ingresar los parámetros necesarios antes de Graficar")
     else:
-        st = obspy.read(miArchivo.get())[0]
         
-        if hInicio == "" and hFin == "" :
-            t = st.stats.starttime
-            trace = st
-            ti=0
+        try:
+            canal1 = int(canalText)
+        except Exception:
+                mb.showerror("Error", 'Valor del canal mal ingresado, debe ser un número')
+                
+        if (canal1<0 or canal1 > 2):
+            mb.showerror("Error", 'El canal debe estar entre 0 y 2')
         else:
+            
             try:
-                ti=datetime.strptime(hInicio,"%H:%M" )
-                tf=datetime.strptime(hFin,"%H:%M" )
-                t = st.stats.starttime
-                #t1 = t + 3600 * float(hInicio)
-                t1 = t + (ti.hour * 60 + ti.minute) * 60
-                t2 = t + (tf.hour * 60 + tf.minute) * 60
-                trace = st.trim(t1,t2)
+                
+                st = obspy.read(miArchivo.get())[canal1]
             except Exception:
-                mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
-        trace.data = trace.data/float(factorConversion)
-        trace.filter('bandpass', freqmin = 5, freqmax = 20)
-        df = trace.stats.sampling_rate
-        print(int(int(preset_len)*df))
-        print(float(p_dur))
-        p_pick, phase_info, cft = pk_baer(trace.data, df, int(tdownmax), int(float(tupevent)*df), float(thr1), float(thr2),
-                                          int(int(preset_len)*df), int(p_dur), True)
-        cft=np.append(cft, 0)
+                mb.showerror("Error", 'El archivo seleccionado no tiene ese canal')
         
-        #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
-        on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
-        path=os.path.abspath(os.getcwd())
-        on_of=on_of/df
-        evetos_obtenidos=[]
-        #funcion para converitr las meustras en horas minutos y segundos
-        for i in range(len(on_of)):
-            for j in range(len(on_of[i])):
-                if ti==0:
-                    sec = timedelta(seconds=on_of[i][j])
-                else:
-                    sec = timedelta(seconds=on_of[i][j]+(ti.hour * 60 + ti.minute) * 60)
-                evetos_obtenidos.append(str(sec))
-        print(np.array(evetos_obtenidos).reshape(len(on_of), 2)) 
-        nombrearch=fd.asksaveasfilename(initialdir = path,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
-        if nombrearch!='':
-            archi1=open(nombrearch, "w", encoding="utf-8")
-            archi1.write(str(np.array(evetos_obtenidos).reshape(len(on_of), 2)))
-            archi1.close()
-            mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
         
+            if hInicio == "" and hFin == "" :
+                t = st.stats.starttime
+                trace = st
+                ti=0
+            else:
+                try:
+                    ti=datetime.strptime(hInicio,"%H:%M" )
+                    tf=datetime.strptime(hFin,"%H:%M" )
+                    t = st.stats.starttime
+                    #t1 = t + 3600 * float(hInicio)
+                    t1 = t + (ti.hour * 60 + ti.minute) * 60
+                    t2 = t + (tf.hour * 60 + tf.minute) * 60
+                    trace = st.trim(t1,t2)
+                except Exception:
+                    mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
+            trace.data = trace.data/float(factorConversion)
+            trace.filter('bandpass', freqmin = 5, freqmax = 20)
+            df = trace.stats.sampling_rate
+            print(int(int(preset_len)*df))
+            print(float(p_dur))
+            p_pick, phase_info, cft = pk_baer(trace.data, df, int(tdownmax), int(float(tupevent)*df), float(thr1), float(thr2),
+                                              int(int(preset_len)*df), int(p_dur), True)
+            cft=np.append(cft, 0)
+            
+            #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
+            on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
+            path=os.path.abspath(os.getcwd())
+            on_of=on_of/df
+            evetos_obtenidos=[]
+            #funcion para converitr las meustras en horas minutos y segundos
+            for i in range(len(on_of)):
+                for j in range(len(on_of[i])):
+                    if ti==0:
+                        sec = timedelta(seconds=on_of[i][j])
+                    else:
+                        sec = timedelta(seconds=on_of[i][j]+(ti.hour * 60 + ti.minute) * 60)
+                    evetos_obtenidos.append(str(sec))
+            print(np.array(evetos_obtenidos).reshape(len(on_of), 2)) 
+            nombrearch=fd.asksaveasfilename(initialdir = path,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
+            if nombrearch!='':
+                archi1=open(nombrearch, "w", encoding="utf-8")
+                archi1.write(str(np.array(evetos_obtenidos).reshape(len(on_of), 2)))
+                archi1.close()
+                mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
+            
     
         
     
-def eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, factorConversion):
+def eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, factorConversion, canalText):
     print("Classic STA/LTA")
     
-    if nsta=="" or nlta=="" or triggerOn=="" or triggerOff=="" or factorConversion=="":
+    if nsta=="" or nlta=="" or triggerOn=="" or triggerOff=="" or factorConversion=="" or canalText=="":
         mb.showinfo("Información", "Debe ingresar los parámetros necesarios antes de obtener los eventos")
     else:
-        st = obspy.read(miArchivo.get())[0]
         
-        if hInicio == "" and hFin == "" :
-            t = st.stats.starttime
-            ti=0
-            trace = st
-        else:
-            try:
-                ti=datetime.strptime(hInicio,"%H:%M" )
-                tf=datetime.strptime(hFin,"%H:%M" )
-                t = st.stats.starttime
-                #t1 = t + 3600 * float(hInicio)
-                t1 = t + (ti.hour * 60 + ti.minute) * 60
-                t2 = t + (tf.hour * 60 + tf.minute) * 60
-                trace = st.trim(t1,t2)
-            except Exception:
-                mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
-        
-        trace.data = trace.data/float(factorConversion)
-        trace.filter('bandpass', freqmin = 5, freqmax = 20)
-        df = trace.stats.sampling_rate
-
-        # se define el tipo de algoritmo a usar
-        #1 = "Classic STA/LTA", 2 = "Recursive STA/LTA", 3 = "Delayed STA/LTA", 4 = "Z-detector", 5="Baer- and Kradolfer-picker", 6 = "AR-AIC"
-        if tipoAlgoritmo == 1:
-            cft = classic_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
-        elif tipoAlgoritmo == 2:
-            cft = recursive_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
-        elif tipoAlgoritmo == 3:
-            cft = delayed_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
-        elif tipoAlgoritmo == 4:
-            cft = z_detect(trace.data, int(float(nsta) * df))
-        else:
-            mb.showinfo("Información", "Debe seleccionar un Algoritmo correcto")
-            
-        on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
-        path=os.path.abspath(os.getcwd())
-        on_of=on_of/df
-        evetos_obtenidos=[]
-        #funcion para converitr las meustras en horas minutos y segundos
-        for i in range(len(on_of)):
-            for j in range(len(on_of[i])):
-                if ti==0:
-                    sec = timedelta(seconds=on_of[i][j])
-                else:
-                    sec = timedelta(seconds=on_of[i][j]+(ti.hour * 60 + ti.minute) * 60)
+        try:
+            canal = int(canalText)
+        except Exception:
+                mb.showerror("Error", 'Valor del canal mal ingresado, debe ser un número')
                 
-                evetos_obtenidos.append(str(sec))
-        print(np.array(evetos_obtenidos).reshape(len(on_of), 2))      
-        nombrearch=fd.asksaveasfilename(initialdir = path ,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
-        if nombrearch!='':
-            archi1=open(nombrearch, "w", encoding="utf-8")
-            archi1.write(str(np.array(evetos_obtenidos).reshape(len(on_of), 2)))
-            archi1.close()
-            mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
+        if (canal<0 or canal > 2):
+            mb.showerror("Error", 'El canal debe estar entre 0 y 2')
+        else:
+            
+            try:
+                
+                st = obspy.read(miArchivo.get())[canal]
+            except Exception:
+                mb.showerror("Error", 'El archivo seleccionado no tiene ese canal')
+        
+            if hInicio == "" and hFin == "" :
+                t = st.stats.starttime
+                ti=0
+                trace = st
+            else:
+                try:
+                    ti=datetime.strptime(hInicio,"%H:%M" )
+                    tf=datetime.strptime(hFin,"%H:%M" )
+                    t = st.stats.starttime
+                    #t1 = t + 3600 * float(hInicio)
+                    t1 = t + (ti.hour * 60 + ti.minute) * 60
+                    t2 = t + (tf.hour * 60 + tf.minute) * 60
+                    trace = st.trim(t1,t2)
+                except Exception:
+                    mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
+            
+            trace.data = trace.data/float(factorConversion)
+            trace.filter('bandpass', freqmin = 5, freqmax = 20)
+            df = trace.stats.sampling_rate
+
+            # se define el tipo de algoritmo a usar
+            #1 = "Classic STA/LTA", 2 = "Recursive STA/LTA", 3 = "Delayed STA/LTA", 4 = "Z-detector", 5="Baer- and Kradolfer-picker", 6 = "AR-AIC"
+            if tipoAlgoritmo == 1:
+                cft = classic_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
+            elif tipoAlgoritmo == 2:
+                cft = recursive_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
+            elif tipoAlgoritmo == 3:
+                cft = delayed_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
+            elif tipoAlgoritmo == 4:
+                cft = z_detect(trace.data, int(float(nsta) * df))
+            else:
+                mb.showinfo("Información", "Debe seleccionar un Algoritmo correcto")
+                
+            on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
+            path=os.path.abspath(os.getcwd())
+            on_of=on_of/df
+            evetos_obtenidos=[]
+            #funcion para converitr las meustras en horas minutos y segundos
+            for i in range(len(on_of)):
+                for j in range(len(on_of[i])):
+                    if ti==0:
+                        sec = timedelta(seconds=on_of[i][j])
+                    else:
+                        sec = timedelta(seconds=on_of[i][j]+(ti.hour * 60 + ti.minute) * 60)
+                    
+                    evetos_obtenidos.append(str(sec))
+            print(np.array(evetos_obtenidos).reshape(len(on_of), 2))      
+            nombrearch=fd.asksaveasfilename(initialdir = path ,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
+            if nombrearch!='':
+                archi1=open(nombrearch, "w", encoding="utf-8")
+                archi1.write(str(np.array(evetos_obtenidos).reshape(len(on_of), 2)))
+                archi1.close()
+                mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
             
 def actualizarVista(event):
     miAlgoritmo =lista_desplegable.get()
@@ -580,6 +662,12 @@ def actualizarVista(event):
         
         factorCTitle.grid(row=5, column=1, padx=10, pady=10)
         factorConversionText.grid(row=5, column=2, padx=10, pady=10)
+        
+        #canal
+        canalTitle.grid(row=5, column=6)
+        canal.grid(row=5, column=7)
+        
+        
         
         #--------------------Botones----------------
         
@@ -637,6 +725,10 @@ def actualizarVista(event):
         
         factorCTitle.grid(row=5, column=1, padx=10, pady=10)
         factorConversionText.grid(row=5, column=2, padx=10, pady=10)
+        
+        #canal
+        canalTitle.grid(row=5, column=6)
+        canal.grid(row=5, column=7)
         
         
         
@@ -700,6 +792,10 @@ def actualizarVista(event):
         #Hora Fin
         #horaFin=Entry(miFrame)
         horaFin.grid(row=3, column=9)
+        
+        #canal
+        canalTitle.grid(row=5, column=6)
+        canal.grid(row=5, column=7)
 
         #--------------------Botones----------------
         
@@ -761,6 +857,9 @@ def eliminarParametros():
     l_pText.grid_forget()
     l_sText.grid_forget()
     
+    canalTitle.grid_forget()
+    canal.grid_forget()
+    
     
         
         
@@ -797,6 +896,8 @@ Label(miFrame, text="Algoritmo de Detección", font=(20)).grid(row=1, column=1, 
 
 ## Titulo de parametros
 parametrosTitle=Label(miFrame, text="Parámetros del Algoritmo", font=(20))
+
+canalTitle=Label(miFrame, text="Canal:", font=(18))
 
 nstaTitle=Label(miFrame, text="NSTA:", font=(18))
 ## Titulo de NLTA
@@ -848,6 +949,10 @@ lista_desplegable.bind("<<ComboboxSelected>>", actualizarVista)
 ## Nombre del archivo seleccionado
 archivo=Label(miFrame, text="", font=(12))
 archivo.grid(row=6, column=1, columnspan=3)
+
+#input del canal
+canal=Entry(miFrame, width=10)
+
 
 ## data del archivo seleccionado
 data=Label(miFrame, text="", font=(12))

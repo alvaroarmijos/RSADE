@@ -535,13 +535,36 @@ def eventosBaer():
                     else:
                         sec = timedelta(seconds=on_of[i][j]+(ti.hour * 60 + ti.minute) * 60)
                     evetos_obtenidos.append(str(sec))
-            print(np.array(evetos_obtenidos).reshape(len(on_of), 2)) 
+            eventos_final = np.array(evetos_obtenidos).reshape(len(on_of), 2) 
             nombrearch=fd.asksaveasfilename(initialdir = path,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
             if nombrearch!='':
                 archi1=open(nombrearch, "w", encoding="utf-8")
-                archi1.write(str(np.array(evetos_obtenidos).reshape(len(on_of), 2)))
+                archi1.write(str(eventos_final))
                 archi1.close()
-                mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
+                #mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
+                value = mb.askyesno(message="¿Desea generar archivos miniSeed de los eventos obtenidos?", title="Generar miniSeed")
+                if (value):
+
+                    for i in range(len(eventos_final)):
+                        print(eventos_final[i][0]+".0")
+                        try:
+                            t_ini=datetime.strptime(eventos_final[i][0],"%H:%M:%S.%f" ).time()
+                        except:
+                            t_ini=datetime.strptime(eventos_final[i][0]+".0","%H:%M:%S.%f" ).time()
+                        try:
+                            t_fin=datetime.strptime(eventos_final[i][1],"%H:%M:%S.%f" ).time()
+                        except:
+                            t_fin=datetime.strptime(eventos_final[i][1]+".0","%H:%M:%S.%f" ).time()
+                        #t1 = t + 3600 * float(hInicio)
+                        #t_1 = (t + (t_ini.hour * 60 + t_ini.minute) * 60)-15
+                        #t_2 = (t + (t_fin.hour * 60 + t_fin.minute) * 60)+15
+                        #traceTemp= stTemp.trim(t_1,t_2)
+                        #trace.write(miArchivo.get()+hInicio+"-"+hFin+'.mseed', format='MSEED')
+                        #traceTemp.write(eventos_final[i][0]+"-"+eventos_final[i][1]+'.mseed', format='MSEED')
+                        guardarMiniSeedEventos(t_ini,t_fin)
+                    
+                    mb.showinfo("Información", "Archivos guardados correctamente")
+                
             
     
         
@@ -614,13 +637,77 @@ def eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fac
                         sec = timedelta(seconds=on_of[i][j]+(ti.hour * 60 + ti.minute) * 60)
                     
                     evetos_obtenidos.append(str(sec))
-            print(np.array(evetos_obtenidos).reshape(len(on_of), 2))      
+                    
+            eventos_final = np.array(evetos_obtenidos).reshape(len(on_of), 2)
+            print(eventos_final)      
             nombrearch=fd.asksaveasfilename(initialdir = path ,title = "Guardar como",filetypes = (("txt files","*.txt"),("todos los archivos","*.*")))
             if nombrearch!='':
                 archi1=open(nombrearch, "w", encoding="utf-8")
-                archi1.write(str(np.array(evetos_obtenidos).reshape(len(on_of), 2)))
+                archi1.write(str(eventos_final))
                 archi1.close()
-                mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
+                #mb.showinfo("Información", "Los eventos fueron guardados en el archivo.")
+                value = mb.askyesno(message="¿Desea generar archivos miniSeed de los eventos obtenidos?", title="Generar miniSeed")
+                if (value):
+                    st = obspy.read(miArchivo.get())[canal]
+                    t = st.stats.starttime
+
+                    for i in range(len(eventos_final)):
+                        stTemp=st
+                        print(eventos_final[i][0]+".0")
+                        try:
+                            t_ini=datetime.strptime(eventos_final[i][0],"%H:%M:%S.%f" ).time()
+                        except:
+                            t_ini=datetime.strptime(eventos_final[i][0]+".0","%H:%M:%S.%f" ).time()
+                        try:
+                            t_fin=datetime.strptime(eventos_final[i][1],"%H:%M:%S.%f" ).time()
+                        except:
+                            t_fin=datetime.strptime(eventos_final[i][1]+".0","%H:%M:%S.%f" ).time()
+                        #t1 = t + 3600 * float(hInicio)
+                        #t_1 = (t + (t_ini.hour * 60 + t_ini.minute) * 60)-15
+                        #t_2 = (t + (t_fin.hour * 60 + t_fin.minute) * 60)+15
+                        #traceTemp= stTemp.trim(t_1,t_2)
+                        #trace.write(miArchivo.get()+hInicio+"-"+hFin+'.mseed', format='MSEED')
+                        #traceTemp.write(eventos_final[i][0]+"-"+eventos_final[i][1]+'.mseed', format='MSEED')
+                        guardarMiniSeedEventos(t_ini,t_fin)
+                    
+                    mb.showinfo("Información", "Archivos guardados correctamente")
+                        
+def guardarMiniSeedEventos(ti, tf):
+    
+    canalText   = canal.get()
+    
+    if miArchivo.get()=="":
+        mb.showinfo("Información", "Debe seleccionar un archivo de eventos antes de Guardar otro")
+    else:
+        
+        try:
+            canal1 = int(canalText)
+        except Exception:
+                mb.showerror("Error", 'Valor del canal mal ingresado, debe ser un número')
+                
+        if (canal1<0 or canal1 > 2):
+            mb.showerror("Error", 'El canal debe estar entre 0 y 2')
+        else:
+            
+            try:
+                
+                st = obspy.read(miArchivo.get())[canal1]
+            except Exception:
+                mb.showerror("Error", 'El archivo seleccionado no tiene ese canal')
+        
+            try:
+                t = st.stats.starttime
+                #t1 = t + 3600 * float(hInicio)
+                t1 = (t + (ti.hour * 60 + ti.minute) * 60)-15
+                t2 = (t + (tf.hour * 60 + tf.minute) * 60)+15
+                trace = st.trim(t1,t2)
+            except Exception:
+                mb.showerror("Error", 'Formato de hora no definido, el formato es HH:MM')
+                    
+            trace.write(miArchivo.get()+ti.strftime('%H:%M:%S')+"-"+tf.strftime('%H:%M:%S')+'.mseed', format='MSEED')
+            
+                                
+                
             
 def actualizarVista(event):
     miAlgoritmo =lista_desplegable.get()

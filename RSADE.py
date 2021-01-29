@@ -415,10 +415,13 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
                 mb.showinfo("Información", "Debe seleccionar un Algoritmo correcto")
             
             #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
+            try:
+                on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
+            except Exception:
+                mb.showerror("Error", 'Valores ingresados triggerOn y triggerOff fuera de rango. Vuelva a intenta con otros valores')
+                
+        
             
-            on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
-            datalabel=trace.data/df
-            # Plotting the results
             
             segundos=(t1.hour * 60 + t1.minute)*60
             f= plt.Figure(figsize=(16, 8))
@@ -428,9 +431,14 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
             #on_of=on_of*df
             ymin, ymax = a.get_ylim()
             a.set_xticklabels(segundos+a.get_xticks()/64)
-            a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
-            a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
-            a.set_xlabel('Segundos [s]')
+            
+            
+            try:
+                a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
+                a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
+                a.set_xlabel('Segundos [s]')
+            except Exception:
+                mb.showerror("Error", 'No se encontraron eventos, intenta con otros valores')
             
             b = f.add_subplot(212)
             #b.subplot(212, sharex=ax)
@@ -624,7 +632,12 @@ def eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fac
             else:
                 mb.showinfo("Información", "Debe seleccionar un Algoritmo correcto")
                 
-            on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
+            try:
+                
+                on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
+            except Exception:
+                mb.showerror("Error", 'Valores ingresados triggerOn y triggerOff fuera de rango. Vuelva a intenta con otros valores')
+                    
             path=os.path.abspath(os.getcwd())
             on_of=on_of/df
             evetos_obtenidos=[]

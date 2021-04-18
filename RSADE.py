@@ -784,6 +784,30 @@ def actualizarVista(event):
         # Boton para extraer archivo miniSeed
         obtenerMiniSeedBtn.grid(row=5, column=5, padx=50, pady=10)
         
+        #----------------------parametros iniciales
+        
+        f1Text.delete(0,'end')
+        f2Text.delete(0,'end')
+        lta_pText.delete(0,'end')
+        sta_pText.delete(0,'end')
+        lta_sText.delete(0,'end')
+        sta_sText.delete(0,'end')
+        m_pText.delete(0,'end')
+        m_sText.delete(0,'end')
+        l_pText.delete(0,'end')
+        l_sText.delete(0,'end')
+        
+        f1Text.insert(0,'1')
+        f2Text.insert(0,'20')
+        lta_pText.insert(0,'8')
+        sta_pText.insert(0,'2')
+        lta_sText.insert(0,'6')
+        sta_sText.insert(0,'3')
+        m_pText.insert(0,'2')
+        m_sText.insert(0,'8')
+        l_pText.insert(0,'0.1')
+        l_sText.insert(0,'0.2')
+        
         
                 
         
@@ -848,6 +872,27 @@ def actualizarVista(event):
 
         # Boton para extraer archivo miniSeed
         obtenerMiniSeedBtn.grid(row=5, column=5, padx=50, pady=10)
+        
+        #-------------------parametros inicicales
+        triggerOnText.delete(0,'end')
+        triggerOffText.delete(0,'end')
+        tdownmaxText.delete(0,'end')
+        tupeventText.delete(0,'end')
+        thr1Text.delete(0,'end')
+        thr2Text.delete(0,'end')
+        preset_lenText.delete(0,'end')
+        p_durText.delete(0,'end')
+        
+        triggerOnText.insert(0,'7')
+        triggerOffText.insert(0,'12')
+        tdownmaxText.insert(0,'20')
+        tupeventText.insert(0,'100')
+        thr1Text.insert(0,'7')
+        thr2Text.insert(0,'12')
+        preset_lenText.insert(0,'100')
+        p_durText.insert(0,'100')
+        
+        
     else:
         
         eliminarParametros()
@@ -914,6 +959,34 @@ def actualizarVista(event):
         # Boton para extraer archivo miniSeed
         obtenerMiniSeedBtn.grid(row=5, column=5, padx=50, pady=10)
         
+        #-----------parametros iniciales
+        nstaText.delete(0,'end')
+        nltaText.delete(0,'end')
+        triggerOnText.delete(0,'end')
+        triggerOffText.delete(0,'end')
+        
+        if miAlgoritmo=="Classic STA/LTA":
+            #algoritmos = ["Classic STA/LTA", "Recursive STA/LTA", "Delayed STA/LTA", "Z-detector", "Baer- and Kradolfer-picker", "AR-AIC"]
+            nstaText.insert(0,'40')
+            nltaText.insert(0,'70')
+            triggerOnText.insert(0,'1.15')
+            triggerOffText.insert(0,'0.85')
+        elif miAlgoritmo=="Recursive STA/LTA":
+            nstaText.insert(0,'20')
+            nltaText.insert(0,'40')
+            triggerOnText.insert(0,'1.1')
+            triggerOffText.insert(0,'0.95')
+        elif miAlgoritmo=="Delayed STA/LTA":
+            nstaText.insert(0,'5')
+            nltaText.insert(0,'500')
+            triggerOnText.insert(0,'101')
+            triggerOffText.insert(0,'100')
+        else:
+            nstaText.insert(0,'8')
+            triggerOnText.insert(0,'0.1')
+            triggerOffText.insert(0,'0')
+            
+            
 def eliminarParametros():
     nstaText.grid_forget()
     nltaText.grid_forget()

@@ -224,14 +224,19 @@ def graficarAr():
         
         segundos=(t1.hour * 60 + t1.minute)*60
         
+        print(p_pick)
+        print(s_pick)
+        
         f = plt.Figure(figsize=(16, 8))
         a = f.add_subplot(211)
         #ax = a.subplot(211)
         a.plot(trace1.data, 'k')
         ymin, ymax = a.get_ylim()
         a.set_xticklabels(segundos+a.get_xticks()/64)
-        a.axvline(x=p_pick*100,linewidth=2, color='r')
-        a.axvline(x=s_pick*100,linewidth=2, color='b')
+        x1=p_pick+segundos
+        x2=s_pick+segundos
+        #a.axvline(x=x1,linewidth=2, color='r')
+        #a.axvline(x=x2,linewidth=2, color='b')
         a.set_xlabel('Segundos [s]')
         
         global canvas
@@ -307,53 +312,49 @@ def graficarBaer():
             trace.data = trace.data/float(factorConversion)
             trace.filter('bandpass', freqmin = 5, freqmax = 20)
             df = trace.stats.sampling_rate
-            print(int(int(preset_len)*df))
-            print(float(p_dur))
             p_pick, phase_info, cft = pk_baer(trace.data, df, int(tdownmax), int(float(tupevent)*df), float(thr1), float(thr2),
                                               int(int(preset_len)*df), int(p_dur), True)
             cft=np.append(cft, 0)
             
             #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
+            print('Time:')
+            print(p_pick/df)
             on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
             # Plotting the results
             
-            segundos=(t1.hour * 60 + t1.minute)*60
-            f = plt.Figure(figsize=(16, 8))
-            a = f.add_subplot(211)
-            #ax = a.subplot(211)
-            a.plot(trace.data, 'k')
-            ymin, ymax = a.get_ylim()
-            a.set_xticklabels(segundos+a.get_xticks()/64)
-            a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
-            a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
-            a.set_xlabel('Segundos [s]')
-            b = f.add_subplot(212)
-            #b.subplot(212, sharex=ax)
-            b.plot(cft, 'k')
-            b.set_xticklabels(segundos+b.get_xticks()/64)
-            b.hlines([float(triggerOn), float(triggerOff)], 0, len(cft), color=['r', 'b'], linestyle='--')
-            b.axis('tight')
-            b.set_xlabel('Segundos [s]')
-            #plt.show()
+            #segundos=(t1.hour * 60 + t1.minute)*60
+            #f = plt.Figure(figsize=(16, 8))
+            #a = f.add_subplot(211)
+            #a.plot(trace.data, 'k')
+            #ymin, ymax = a.get_ylim()
+            #a.set_xticklabels(segundos+a.get_xticks()/64)
+            #a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
+            #a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
+            #a.set_xlabel('Segundos [s]')
+            #b = f.add_subplot(212)
+            #b.plot(cft, 'k')
+            #b.set_xticklabels(segundos+b.get_xticks()/64)
+            #b.hlines([float(triggerOn), float(triggerOff)], 0, len(cft), color=['r', 'b'], linestyle='--')
+            #b.axis('tight')
+            #b.set_xlabel('Segundos [s]')
             #global canvas
-            global canvas
-            global toolbar
+            #global toolbar
             #se intenta borrar la grafica en caso de que ya este dibujada en la interfaz
-            try:
-                canvas.get_tk_widget().pack_forget() # use the delete method here
-                toolbar.pack_forget()
-            except:
-                pass
+            #try:
+            #    canvas.get_tk_widget().pack_forget() # use the delete method here
+            #    toolbar.pack_forget()
+            #except:
+            #    pass
             
             
-            canvas = FigureCanvasTkAgg(f, top_frame)
+            #canvas = FigureCanvasTkAgg(f, top_frame)
             
-            canvas.get_tk_widget().pack(side="left", fill="both")
-            canvas.draw()
+            #canvas.get_tk_widget().pack(side="left", fill="both")
+            #canvas.draw()
 
-            toolbar = NavigationToolbar2Tk(canvas, bottom_frame)
-            toolbar.update()
-            canvas._tkcanvas.pack(side="left", fill="both")
+            #toolbar = NavigationToolbar2Tk(canvas, bottom_frame)
+            #toolbar.update()
+            #canvas._tkcanvas.pack(side="left", fill="both")
     
     
     
@@ -405,7 +406,7 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
             elif tipoAlgoritmo == 2:
                 cft = recursive_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
             elif tipoAlgoritmo == 3:
-                cft = delayed_sta_lta(trace.data, int(float(nsta) * df), int(float(nlta) * df))
+                cft = delayed_sta_lta(trace.data, int(float(nsta)* df), int(float(nlta)* df))
             elif tipoAlgoritmo == 4:
                 cft = z_detect(trace.data, int(float(nsta) * df))
             elif tipoAlgoritmo == 5:
@@ -531,7 +532,10 @@ def eventosBaer():
             cft=np.append(cft, 0)
             
             #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
-            on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
+            try:
+                on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
+            except Exception:
+                    mb.showerror("Atención", 'No se encontraron eventos')
             path=os.path.abspath(os.getcwd())
             on_of=on_of/df
             evetos_obtenidos=[]
@@ -580,7 +584,7 @@ def eventosBaer():
 def eventos(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, factorConversion, canalText):
     print("Classic STA/LTA")
     
-    if nsta=="" or nlta=="" or triggerOn=="" or triggerOff=="" or factorConversion=="" or canalText=="":
+    if nsta=="" or triggerOn=="" or triggerOff=="" or factorConversion=="" or canalText=="":
         mb.showinfo("Información", "Debe ingresar los parámetros necesarios antes de obtener los eventos")
     else:
         
@@ -1108,17 +1112,17 @@ l_sText=Entry(miFrame, width=10)
 
 
 #--------------------Botones----------------
-        
+
 # Boton para Seleccionar Archivo
-seleccionArchivoBtn = Button(miFrame, text="Seleccionar Archivo", command=seleccionarArchivo)
+seleccionArchivoBtn = Button(miFrame, text="Seleccionar Archivo", command=seleccionarArchivo, bg='#0D225F', fg="white", activebackground='#163aa2', activeforeground='white')
 # Boton Graficar Eventos seleccionarArchivo
-graficarEventosBtn=Button(miFrame, text="Graficar Eventos", command=graficarEvento)
+graficarEventosBtn=Button(miFrame, text="Graficar Eventos", command=graficarEvento, bg='#0D225F', fg="white", activebackground='#163aa2', activeforeground='white')
 
 # Boton Obtener Eventos
-obtenerEventosBtn=Button(miFrame, text="Obtener Eventos", command=obtenerEvento)
+obtenerEventosBtn=Button(miFrame, text="Obtener Eventos", command=obtenerEvento, bg='#0D225F', fg="white", activebackground='#163aa2', activeforeground='white')
 
 # Boton para extraer archivo miniSeed
-obtenerMiniSeedBtn=Button(miFrame, text="Obtener miniSeed", command=guardarMiniSeed)
+obtenerMiniSeedBtn=Button(miFrame, text="Obtener miniSeed", command=guardarMiniSeed , bg='#0D225F', fg="white", activebackground='#163aa2', activeforeground='white')
 
 
 

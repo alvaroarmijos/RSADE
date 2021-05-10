@@ -312,13 +312,13 @@ def graficarBaer():
             trace.data = trace.data/float(factorConversion)
             trace.filter('bandpass', freqmin = 5, freqmax = 20)
             df = trace.stats.sampling_rate
-            p_pick, phase_info, cft = pk_baer(trace.data, df, int(tdownmax), int(float(tupevent)*df), float(thr1), float(thr2),
-                                              int(int(preset_len)*df), int(p_dur), True)
+            p_pick, phase_info, cft = pk_baer(trace.data, df, int(tdownmax), int(float(tupevent)), float(thr1), float(thr2),
+                                              int(int(preset_len)), int(p_dur), True)
             cft=np.append(cft, 0)
             
             #plot_trigger(trace, cft, float(triggerOn), float(triggerOff))
             print('Time:')
-            print(p_pick/df)
+            print((p_pick/df)/60)
             on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
             # Plotting the results
             
@@ -432,6 +432,7 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
             #on_of=on_of*df
             ymin, ymax = a.get_ylim()
             a.set_xticklabels(segundos+a.get_xticks()/64)
+            print(on_of)
             
             
             try:
@@ -442,14 +443,11 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
                 mb.showerror("Error", 'No se encontraron eventos, intenta con otros valores')
             
             b = f.add_subplot(212)
-            #b.subplot(212, sharex=ax)
             b.plot(cft, 'k')
             b.set_xticklabels(segundos+b.get_xticks()/64)
             b.hlines([float(triggerOn), float(triggerOff)], 0, len(cft), color=['r', 'b'], linestyle='--')
             b.set_xlabel('Segundos [s]')
             b.axis('tight')
-            #plt.show()
-            #global canvas
             global canvas
             global toolbar
             #se intenta borrar la grafica en caso de que ya este dibujada en la interfaz
@@ -1044,7 +1042,7 @@ def eliminarParametros():
 #---------------------#Interfaz------------------------------------------------
 raiz=Tk()
 
-raiz.title("Red Sísmica del Austro")
+raiz.title("RSADE")
 raiz.attributes('-zoomed', True)
 
 #agregar imagen a la ventana
@@ -1215,6 +1213,11 @@ obtenerMiniSeedBtn=Button(miFrame, text="Obtener miniSeed", command=guardarMiniS
 # Eventos
 #miImagen = PhotoImage(file="p7.png")
 #Label(miFrame, image=miImagen).grid(row=5, column=0, columnspan=7)
+
+miImagen = PhotoImage(file="ucuenca.png")
+imagen_sub = miImagen.subsample(4)
+miImagen = imagen_sub
+Label(miFrame, image=miImagen).grid(row=1, column=10, rowspan=4, padx=10, pady=50)
 
 
 raiz.mainloop()

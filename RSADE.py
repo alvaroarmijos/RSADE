@@ -322,39 +322,39 @@ def graficarBaer():
             on_of = trigger_onset(cft, float(triggerOn), float(triggerOff))
             # Plotting the results
             
-            #segundos=(t1.hour * 60 + t1.minute)*60
-            #f = plt.Figure(figsize=(16, 8))
-            #a = f.add_subplot(211)
-            #a.plot(trace.data, 'k')
-            #ymin, ymax = a.get_ylim()
-            #a.set_xticklabels(segundos+a.get_xticks()/64)
-            #a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
-            #a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
-            #a.set_xlabel('Segundos [s]')
-            #b = f.add_subplot(212)
-            #b.plot(cft, 'k')
-            #b.set_xticklabels(segundos+b.get_xticks()/64)
-            #b.hlines([float(triggerOn), float(triggerOff)], 0, len(cft), color=['r', 'b'], linestyle='--')
+            segundos=(t1.hour * 60 + t1.minute)*60
+            f = plt.Figure(figsize=(16, 8))
+            a = f.add_subplot(211)
+            a.plot(trace.data, 'k')
+            ymin, ymax = a.get_ylim()
+            a.set_xticklabels(segundos+a.get_xticks()/64)
+            a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
+            a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
+            a.set_xlabel('Segundos [s]')
+            b = f.add_subplot(212)
+            b.plot(cft, 'k')
+            b.set_xticklabels(segundos+b.get_xticks()/64)
+            b.hlines([float(triggerOn), float(triggerOff)], 0, len(cft), color=['r', 'b'], linestyle='--')
             #b.axis('tight')
-            #b.set_xlabel('Segundos [s]')
-            #global canvas
-            #global toolbar
+            b.set_xlabel('Segundos [s]')
+            global canvas
+            global toolbar
             #se intenta borrar la grafica en caso de que ya este dibujada en la interfaz
-            #try:
-            #    canvas.get_tk_widget().pack_forget() # use the delete method here
-            #    toolbar.pack_forget()
-            #except:
-            #    pass
+            try:
+                canvas.get_tk_widget().pack_forget() # use the delete method here
+                toolbar.pack_forget()
+            except:
+                pass
             
             
-            #canvas = FigureCanvasTkAgg(f, top_frame)
+            canvas = FigureCanvasTkAgg(f, top_frame)
             
-            #canvas.get_tk_widget().pack(side="left", fill="both")
-            #canvas.draw()
+            canvas.get_tk_widget().pack(side="left", fill="both")
+            canvas.draw()
 
-            #toolbar = NavigationToolbar2Tk(canvas, bottom_frame)
-            #toolbar.update()
-            #canvas._tkcanvas.pack(side="left", fill="both")
+            toolbar = NavigationToolbar2Tk(canvas, bottom_frame)
+            toolbar.update()
+            canvas._tkcanvas.pack(side="left", fill="both")
     
     
     

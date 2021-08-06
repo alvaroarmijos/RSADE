@@ -230,14 +230,18 @@ def graficarAr():
         f = plt.Figure(figsize=(16, 8))
         a = f.add_subplot(211)
         #ax = a.subplot(211)
+        
         a.plot(trace1.data, 'k')
         ymin, ymax = a.get_ylim()
+        
         a.set_xticklabels(segundos+a.get_xticks()/64)
-        x1=p_pick+segundos
-        x2=s_pick+segundos
-        #a.axvline(x=x1,linewidth=2, color='r')
-        #a.axvline(x=x2,linewidth=2, color='b')
-        a.set_xlabel('Segundos [s]')
+        x1=p_pick*df 
+        x2=s_pick*df
+        a.axvline(x=x1,linewidth=2, color='r')
+        a.axvline(x=x2,linewidth=2, color='b')
+        a.tick_params(labelsize=12)
+        a.set_xlabel('Segundos [s]', fontsize=15)
+        a.set_ylabel('Voltaje [v]', fontsize=15)
         
         global canvas
         global toolbar
@@ -330,13 +334,16 @@ def graficarBaer():
             a.set_xticklabels(segundos+a.get_xticks()/64)
             a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
             a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
-            a.set_xlabel('Segundos [s]')
+            a.tick_params(labelsize=12)
+            a.set_xlabel('Segundos [s]', fontsize=15)
+            a.set_ylabel('Voltaje [v]', fontsize=15)
             b = f.add_subplot(212)
             b.plot(cft, 'k')
             b.set_xticklabels(segundos+b.get_xticks()/64)
             b.hlines([float(triggerOn), float(triggerOff)], 0, len(cft), color=['r', 'b'], linestyle='--')
             #b.axis('tight')
-            b.set_xlabel('Segundos [s]')
+            b.tick_params(labelsize=12)
+            b.set_xlabel('Segundos [s]', fontsize=15)
             global canvas
             global toolbar
             #se intenta borrar la grafica en caso de que ya este dibujada en la interfaz
@@ -423,7 +430,6 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
                 
         
             
-            
             segundos=(t1.hour * 60 + t1.minute)*60
             f= plt.Figure(figsize=(16, 8))
             a= f.add_subplot(211)
@@ -432,13 +438,15 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
             #on_of=on_of*df
             ymin, ymax = a.get_ylim()
             a.set_xticklabels(segundos+a.get_xticks()/64)
+            a.tick_params(labelsize=12)
+            a.set_xlabel('Segundos [s]', fontsize=15)
+            a.set_ylabel('Voltaje [v]', fontsize=15)
             print(on_of)
             
             
             try:
                 a.vlines(on_of[:, 0], ymin, ymax, color='r', linewidth=2)
                 a.vlines(on_of[:, 1], ymin, ymax, color='b', linewidth=2)
-                a.set_xlabel('Segundos [s]')
             except Exception:
                 mb.showerror("Error", 'No se encontraron eventos, intenta con otros valores')
             
@@ -446,7 +454,9 @@ def graficar(nsta, nlta, triggerOn, triggerOff, hInicio, hFin, tipoAlgoritmo, fa
             b.plot(cft, 'k')
             b.set_xticklabels(segundos+b.get_xticks()/64)
             b.hlines([float(triggerOn), float(triggerOff)], 0, len(cft), color=['r', 'b'], linestyle='--')
-            b.set_xlabel('Segundos [s]')
+            b.tick_params(labelsize=12)
+            b.set_xlabel('Segundos [s]', fontsize=15)
+            #b.set_ylabel('Voltaje [v]', fontsize=15)
             b.axis('tight')
             global canvas
             global toolbar
@@ -881,14 +891,14 @@ def actualizarVista(event):
         preset_lenText.delete(0,'end')
         p_durText.delete(0,'end')
         
-        triggerOnText.insert(0,'7')
-        triggerOffText.insert(0,'12')
+        triggerOnText.insert(0,'12000')
+        triggerOffText.insert(0,'10000')
         tdownmaxText.insert(0,'20')
-        tupeventText.insert(0,'100')
+        tupeventText.insert(0,'60')
         thr1Text.insert(0,'7')
         thr2Text.insert(0,'12')
-        preset_lenText.insert(0,'100')
-        p_durText.insert(0,'100')
+        preset_lenText.insert(0,'200')
+        p_durText.insert(0,'200')
         
         
     else:
@@ -1074,9 +1084,9 @@ parametrosTitle=Label(miFrame, text="Parámetros del Algoritmo", font=(20))
 
 canalTitle=Label(miFrame, text="Canal:", font=(18))
 
-nstaTitle=Label(miFrame, text="NSTA:", font=(18))
+nstaTitle=Label(miFrame, text="STA [s]:", font=(18))
 ## Titulo de NLTA
-nltaTitle=Label(miFrame, text="NLTA:", font=(18))
+nltaTitle=Label(miFrame, text="LTA [s]:", font=(18))
 ## Titulo de Triger On
 triggerOnTitle=Label(miFrame, text="TRIGGER_ON:", font=(18))
 ## Titulo de Triger Off

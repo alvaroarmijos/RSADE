@@ -28,6 +28,8 @@ python RSADE.py
 ```
   
 ## Funcionamiento
+Para mayor informacion puede consultar el [manual de usuario](https://github.com/alvaroarmijos/RSADE/blob/main/Manual%20de%20usuario.pdf "manual de usuario")
+
 Esta herramienta sirve para diferentes algoritmos disponibles en [ObsPy](https://docs.obspy.org/tutorial/code_snippets/trigger_tutorial.html "obspy")
   
  - Classic STA/LTA, Recursive STA/LTA, Delayed STA/LTA, Z-detector. Para estos algoritmo se tiene la interfaz que se muestra a continuación. Los parámetros que se requiere ingresar se pueden consultar en la siguiente  [documentación](https://docs.obspy.org/packages/autogen/obspy.signal.trigger.classic_sta_lta.html#obspy.signal.trigger.classic_sta_lta "documentación")
